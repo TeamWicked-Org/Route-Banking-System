@@ -70,6 +70,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)build\</OutDir>
+    <IntDir>$(SolutionDir)build\intermediates\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)build\</OutDir>
+    <IntDir>$(SolutionDir)build\intermediates\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -127,15 +135,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\models\Account.h" />
-    <ClInclude Include="include\models\Customer.h" />
-    <ClInclude Include="include\models\Transaction.h" />
+    <ClInclude Include="include\models\Admin.h" />
+    <ClInclude Include="include\models\Client.h" />
+    <ClInclude Include="include\models\Employee.h" />
+    <ClInclude Include="include\utilities\Validation.h" />
+    <ClInclude Include="include\models\Person.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\models\Admin.cpp" />
+    <ClCompile Include="src\models\Client.cpp" />
+    <ClCompile Include="src\models\Employee.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\models\Account.cpp" />
-    <ClCompile Include="src\models\Customer.cpp" />
-    <ClCompile Include="src\models\Transaction.cpp" />
+    <ClCompile Include="src\models\Person.cpp" />
+    <ClCompile Include="src\models\Validation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
