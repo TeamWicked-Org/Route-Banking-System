@@ -35,7 +35,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\models\Validation.cpp">
+    <ClCompile Include="src\utilities\Validation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\models\Person.cpp">
