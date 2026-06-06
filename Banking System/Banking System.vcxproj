@@ -138,7 +138,7 @@
     <ClInclude Include="include\models\Admin.h" />
     <ClInclude Include="include\models\Client.h" />
     <ClInclude Include="include\models\Employee.h" />
-    <ClInclude Include="include\utilities\Validation.h" />
+    <ClInclude Include="include\models\utils.h" />
     <ClInclude Include="include\models\Person.h" />
   </ItemGroup>
   <ItemGroup>
@@ -147,7 +147,7 @@
     <ClCompile Include="src\models\Employee.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\models\Person.cpp" />
-    <ClCompile Include="src\utilities\Validation.cpp" />
+    <ClCompile Include="src\models\utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -6,30 +6,34 @@ using namespace std;
 int main()
 {
     // Validation Name Tests
-    bool hey = Validation::validateName("Black Myth Wukong");
+    bool hey = utils::Validation::validateName("Black Myth Wukong");
     cout << (hey ? "Name Valid!" : "Invalid Name!") << endl;
 
-    hey = Validation::validateName(" Black Myth Wukong");
+    hey = utils::Validation::validateName(" Black Myth Wukong");
     cout << (hey ? "Name Valid!" : "Invalid Name!") << endl;
 
-    hey = Validation::validateName("Black Myth Wukong ");
+    hey = utils::Validation::validateName("Black Myth Wukong ");
     cout << (hey ? "Name Valid!" : "Invalid Name!") << endl;
 
-    hey = Validation::validateName("         ");
+    hey = utils::Validation::validateName("         ");
     cout << (hey ? "Name Valid!" : "Invalid Name!") << endl;
 
     // Validation Password Tests
-    hey = Validation::validatePassword("Djkasbkj$@!#");
+    hey = utils::Validation::validatePassword("Djkasbkj$@!#");
     cout << (hey ? "Password Valid!" : "Invalid Password!") << endl;
 
-    hey = Validation::validatePassword("Djkasbkj$@!# ");
+    hey = utils::Validation::validatePassword("Djkasbkj$@!# ");
     cout << (hey ? "Password Valid!" : "Invalid Password!") << endl;
 
-    hey = Validation::validatePassword(" Djkasbkj$@!#");
+    hey = utils::Validation::validatePassword(" Djkasbkj$@!#");
     cout << (hey ? "Password Valid!" : "Invalid Password!") << endl;
 
-    hey = Validation::validatePassword("Djkasbk j$@!#");
+    hey = utils::Validation::validatePassword("Djkasbk j$@!#");
     cout << (hey ? "Password Valid!" : "Invalid Password!") << endl;
+
+    // this hash is just to save password as hash 64-character string instead of plain text in database
+    string hashTesting = utils::Security::stringHash("Secure Password!");
+    cout << hashTesting << endl;
 
     return 0;
 }
