@@ -17,7 +17,7 @@ public:
     Person(int id, std::string name, std::string password); 
  
   // Setters 
-    void setName(std::string name); 
+    void setName(std::string name);
     void setID(int id); 
     void setPassword(std::string password); 
  
