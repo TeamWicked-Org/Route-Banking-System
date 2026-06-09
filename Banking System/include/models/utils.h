@@ -106,4 +106,4 @@ namespace utils {
 		static std::string stringHash(std::string str);
 
 	};
-}
+}  // namespace utils
