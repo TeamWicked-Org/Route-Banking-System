@@ -128,13 +128,24 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="external\imgui\imconfig.h" />
+    <ClInclude Include="external\imgui\imgui.h" />
+    <ClInclude Include="external\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="external\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="external\imgui\imgui_internal.h" />
+    <ClInclude Include="external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="external\imgui\imstb_textedit.h" />
+    <ClInclude Include="external\imgui\imstb_truetype.h" />
+    <ClInclude Include="include\models\banking_gui.h" />
     <ClInclude Include="include\models\Admin.h" />
     <ClInclude Include="include\models\Client.h" />
     <ClInclude Include="include\models\Employee.h" />
@@ -142,6 +153,14 @@
     <ClInclude Include="include\models\Person.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="external\imgui\imgui.cpp" />
+    <ClCompile Include="external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="external\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="external\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\models\banking_gui.cpp" />
     <ClCompile Include="src\models\Admin.cpp" />
     <ClCompile Include="src\models\Client.cpp" />
     <ClCompile Include="src\models\Employee.cpp" />

@@ -17,7 +17,7 @@ void Client::setName(std::string name) {
 }
 
 void Client::setPassword(std::string password) {
-	Person::setPassword(utils::Security::stringHash(password));
+	Person::setPassword(password);
 }
 
 void Client::setBalance(double bal) {
