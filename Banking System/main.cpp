@@ -90,10 +90,18 @@ static LRESULT CALLBACK WndProc(HWND h, UINT msg, WPARAM w, LPARAM l)
     switch (msg) {
     case WM_SIZE:
         if (w != SIZE_MINIMIZED && g_dev && g_sc) {
+            // 1. Unbind FIRST so the context drops its internal reference
+            if (g_ctx) {
+                g_ctx->OMSetRenderTargets(0, nullptr, nullptr);
+                g_ctx->Flush(); // flush any in-flight commands referencing the RTV
+            }
+            // 2. Now it's safe to release — ref count will actually hit zero
             if (g_rtv) { g_rtv->Release(); g_rtv = nullptr; }
-            if (g_ctx)  g_ctx->OMSetRenderTargets(0, nullptr, nullptr);
-            g_sc->ResizeBuffers(0, LOWORD(l), HIWORD(l), DXGI_FORMAT_UNKNOWN, 0);
-            make_rtv();
+            // 3. ResizeBuffers now has zero outstanding references — won't fail
+            HRESULT hr = g_sc->ResizeBuffers(
+                0, LOWORD(l), HIWORD(l), DXGI_FORMAT_UNKNOWN, 0);
+            if (SUCCEEDED(hr))
+                make_rtv();
         }
         return 0;
     case WM_CLOSE:
@@ -204,6 +212,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE,
         g_sc->Present(1, 0);   // vsync
     }
 
+    if (myTexture) { myTexture->Release(); myTexture = nullptr; }
     banking_gui::shutdown(g_hwnd);
     free_d3d11();
     UnregisterClassW(L"BankingSystemWnd", hInst);
