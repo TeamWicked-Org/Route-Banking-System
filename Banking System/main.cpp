@@ -18,6 +18,9 @@
 #include "include/models/banking_gui.h"
 #include "include/models/Client.h"
 #include "include/models/Employee.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "external/imgLib/stb_image.h"
+#include "include/images/images.h"
 
 // Static ID counters (one translation unit must own these)
 int Client::id = 0;
@@ -140,8 +143,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE,
     }
 
     // Rounded window corners on Windows 11+
-    DWORD corner = 2;
+    DWORD corner = 0;
     DwmSetWindowAttribute(g_hwnd, 33, &corner, sizeof(corner));
+
 
     banking_gui::init(g_hwnd, g_dev, g_ctx);
 
@@ -150,6 +154,42 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE,
 
     // Background clear colour matches ImGui window background
     constexpr float kClear[4] = { 0.08f, 0.10f, 0.14f, 1.f };
+
+    unsigned char* rgba_bgImg_data = stbi_load_from_memory(kImg_Image01, sizeof(kImg_Image01), &image_width, &image_height, &channels, 4);
+
+    ID3D11ShaderResourceView* myTexture = nullptr;
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = image_width;
+    desc.Height = image_height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+    D3D11_SUBRESOURCE_DATA subResource = {};
+    subResource.pSysMem = rgba_bgImg_data;
+
+    subResource.SysMemPitch = image_width * 4;
+
+    ID3D11Texture2D* pTexture = nullptr;
+
+    HRESULT hr = g_dev->CreateTexture2D(&desc, &subResource, &pTexture);
+
+    if (SUCCEEDED(hr))
+    {
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Format = desc.Format;
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MostDetailedMip = 0;
+        srvDesc.Texture2D.MipLevels = 1;
+
+        hr = g_dev->CreateShaderResourceView(pTexture, &srvDesc, &myTexture);
+        pTexture->Release();
+    }
+    stbi_image_free(rgba_bgImg_data);
 
     MSG msg{};
     while (msg.message != WM_QUIT) {
@@ -160,7 +200,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE,
         }
         g_ctx->OMSetRenderTargets(1, &g_rtv, nullptr);
         g_ctx->ClearRenderTargetView(g_rtv, kClear);
-        banking_gui::tick();
+        banking_gui::tick(myTexture, kW, kH);
         g_sc->Present(1, 0);   // vsync
     }
 

@@ -14,6 +14,6 @@
 
 namespace banking_gui {
     bool init(HWND hwnd, ID3D11Device* dev, ID3D11DeviceContext* ctx);
-    void tick();
+    void tick(ID3D11ShaderResourceView* bgImg, int img_width, int img_height);
     void shutdown(HWND hwnd);
 }

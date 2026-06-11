@@ -176,13 +176,15 @@ static void stats_bar(const char* la, const char* va, ImVec4 ca,
     ImGui::PopStyleColor();
 }
 
+ImFont* customFontSize;
+
 // =============================================================================
 // Login Screen
 // =============================================================================
 static void draw_login_screen(const ImVec2& display)
 {
     constexpr float CW = 420.f;
-    constexpr float CH = 372.f;
+    constexpr float CH = 400.f;
 
     ImGui::SetCursorPos({ (display.x - CW) * 0.5f,
                          (display.y - CH) * 0.5f });
@@ -215,8 +217,8 @@ static void draw_login_screen(const ImVec2& display)
     ImGui::Spacing();
 
     // ── Input fields ──────────────────────────────────────────
-    static char uname[64] = {};
-    static char upass[64] = {};
+    static char uname[64] = { 'S','u','p','e','r','A','d','m','i','n'};
+    static char upass[64] = { 'a','d','m','i','n','p','a','s','s','1'};
     static char err[160] = {};
 
     constexpr float FX = 20.f;                   // left margin
@@ -226,19 +228,28 @@ static void draw_login_screen(const ImVec2& display)
     ImGui::TextDisabled("Username");
     ImGui::SetCursorPosX(FX);
     ImGui::SetNextItemWidth(FW);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, {0.4392f, 0.4471f, 0.4549f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_Text, {0.0f, 0.0f, 0.0f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_InputTextCursor, {0.0f, 0.0f, 0.0f, 1.0f});
+    ImGui::PushFont(customFontSize);
     bool user_enter = ImGui::InputText("##ln_u", uname, sizeof uname,
         ImGuiInputTextFlags_EnterReturnsTrue);
     // Enter in username box → jump focus to password
     if (user_enter) ImGui::SetKeyboardFocusHere();
 
+    ImGui::PopFont();
     ImGui::Spacing();
     ImGui::SetCursorPosX(FX);
     ImGui::TextDisabled("Password");
     ImGui::SetCursorPosX(FX);
     ImGui::SetNextItemWidth(FW);
+    ImGui::PushFont(customFontSize);
     bool pass_enter = ImGui::InputText("##ln_p", upass, sizeof upass,
         ImGuiInputTextFlags_Password |
         ImGuiInputTextFlags_EnterReturnsTrue);
+
+    ImGui::PopStyleColor(3);
+    ImGui::PopFont();
 
     // ── Error message ─────────────────────────────────────────
     ImGui::Spacing();
@@ -285,7 +296,7 @@ static void draw_login_screen(const ImVec2& display)
     ImGui::PushStyleColor(ImGuiCol_Text, { 0.42f,0.50f,0.64f,1.f });
     ImGui::TextWrapped("Demo  |  Admin: SuperAdmin / adminpass1");
     ImGui::SetCursorPosX(FX);
-    ImGui::TextWrapped("       |  Staff: Emma Davis / emppass001");
+    ImGui::TextWrapped("            |  Staff: Emma Davis / emppass001");
     ImGui::PopStyleColor();
 
     ImGui::EndChild();
@@ -572,6 +583,14 @@ static void modal_add_admin()
 // Views
 // =============================================================================
 
+// Row centering helper
+void TableCenteredY(float row_height)
+{
+    float h = ImGui::GetFrameHeight();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (row_height - h) * 0.5f);
+}
+
+
 // ── Client Management ─────────────────────────────────────────────────────────
 static void view_clients(float w, float h)
 {
@@ -584,6 +603,7 @@ static void view_clients(float w, float h)
 
     int delete_idx = -1;
     float table_h = h - 168.f;
+    float row_h = 35.f;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.06f,0.07f,0.11f,1.f });
     ImGui::BeginChild("##ct", { w,table_h }, true);
@@ -600,12 +620,12 @@ static void view_clients(float w, float h)
         ImGui::TableHeadersRow();
 
         for (int i = 0; i < (int)clients.size(); ++i) {
-            ImGui::TableNextRow(ImGuiTableRowFlags_None, 26.f);
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, row_h);
             bool sel = (selected_client == i);
             ImGui::TableSetColumnIndex(0);
             char lbl[24]; snprintf(lbl, sizeof lbl, "%d##cs%d", clients[i].getID(), i);
             if (ImGui::Selectable(lbl, sel,
-                ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, { 0,24.f }))
+                ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, { 0,row_h }))
                 selected_client = i;
             ImGui::TableSetColumnIndex(1);
             ImGui::Text("%s", clients[i].getName().c_str());
@@ -616,6 +636,7 @@ static void view_clients(float w, float h)
             ImGui::Text("%s", fmt_money(bal).c_str());
             ImGui::PopStyleColor();
             ImGui::TableSetColumnIndex(3);
+            TableCenteredY(row_h);
             ImGui::PushID(i);
             if (btn_green("Deposit", { 72.f,0.f })) { selected_client = i; open_deposit = true; }
             ImGui::SameLine();
@@ -808,7 +829,7 @@ bool banking_gui::init(HWND hwnd, ID3D11Device* dev, ID3D11DeviceContext* ctx)
     s.WindowRounding = 6.f;  s.FrameRounding = 4.f;  s.PopupRounding = 4.f;
     s.ScrollbarRounding = 4.f; s.GrabRounding = 4.f;  s.TabRounding = 4.f;
     s.WindowBorderSize = 0.f; s.FrameBorderSize = 0.f;
-    s.WindowPadding = { 12.f,12.f }; s.FramePadding = { 8.f,5.f }; s.ItemSpacing = { 8.f,6.f };
+    s.WindowPadding = { 0.f,0.f }; s.FramePadding = { 8.f,5.f }; s.ItemSpacing = { 8.f,6.f };
     s.ScrollbarSize = 12.f;
 
     auto& c = s.Colors;
@@ -851,7 +872,9 @@ bool banking_gui::init(HWND hwnd, ID3D11Device* dev, ID3D11DeviceContext* ctx)
 
     ImFont* seg_font = io.Fonts->AddFontFromFileTTF(
         "C:\\Windows\\Fonts\\segoeui.ttf",
-        15.0f, &cfg, k_font_ranges);
+        18.0f, &cfg, k_font_ranges);
+
+    customFontSize = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 24.0f);
 
     if (!seg_font) {
         // Fallback: built-in pixel font (ASCII only, no UTF-8 extension)
@@ -891,7 +914,7 @@ void banking_gui::shutdown(HWND /*hwnd*/)
 // =============================================================================
 // tick()  --  called every frame
 // =============================================================================
-void banking_gui::tick()
+void banking_gui::tick(ID3D11ShaderResourceView* bgImg = nullptr, int img_width = 0, int img_height = 0)
 {
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -914,6 +937,7 @@ void banking_gui::tick()
     // A) LOGIN SCREEN (not yet authenticated)
     // ─────────────────────────────────────────────────────────
     if (!bank_state::is_logged_in()) {
+        ImGui::Image((void*)bgImg, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
         draw_login_screen(display);
         ImGui::End();
         ImGui::Render();
@@ -930,7 +954,7 @@ void banking_gui::tick()
         bank_state::current_view != bank_state::View::Clients)
         bank_state::current_view = bank_state::View::Clients;
 
-    const float sw = 185.f;   // sidebar width
+    const float sw = 220.f;   // sidebar width
 
     // ── Sidebar ───────────────────────────────────────────────
     ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.05f,0.06f,0.09f,1.f });
@@ -944,20 +968,25 @@ void banking_gui::tick()
     ImGui::SetWindowFontScale(1.f);
     ImGui::PopStyleColor();
     ImGui::SetCursorPosX(14.f);
-    ImGui::TextDisabled("Banking System");
+    ImGui::TextDisabled("TeamWicked Banking System");
 
     ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 
     // Logged-in user info
     ImGui::SetCursorPosX(14.f);
+    ImGui::SetWindowFontScale(1.22f);
+    ImGui::Text("User Info:");
+    ImGui::SetWindowFontScale(1.f);
+    ImGui::SetCursorPosX(24.f);
     ImGui::PushStyleColor(ImGuiCol_Text, { 0.78f,0.88f,1.f,1.f });
-    ImGui::Text("%.20s", bank_state::current_username.c_str());
+    ImGui::Text("Username: %.20s", bank_state::current_username.c_str());
     ImGui::PopStyleColor();
-    ImGui::SetCursorPosX(14.f);
-    ImGui::TextDisabled("%s",
+    ImGui::SetCursorPosX(24.f);
+    ImGui::TextDisabled("Role: %s",
         bank_state::current_role == bank_state::Role::Admin
         ? "Administrator" : "Employee");
 
+    ImGui::SetCursorPosX(14.f);
     ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 
     // Nav buttons — filtered by role
@@ -979,7 +1008,8 @@ void banking_gui::tick()
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
             active ? ImVec4{ 0.19f,0.44f,0.86f,1.f }
         : ImVec4{ 0.12f,0.16f,0.24f,1.f });
-        if (ImGui::Button(n.label, { sw - 16.f, 38.f }))
+        ImGui::SetCursorPosX(14.f);
+        if (ImGui::Button(n.label, { sw - 28.f, 38.f }))
             bank_state::current_view = n.view;
         ImGui::PopStyleColor(2);
         ImGui::Spacing();
@@ -1002,10 +1032,10 @@ void banking_gui::tick()
     }
 
     // Logout button pinned to the bottom of the sidebar
-    ImGui::SetCursorPosY(display.y - 56.f);
+    ImGui::SetCursorPosY(display.y - 90.f);
     ImGui::Separator(); ImGui::Spacing();
     ImGui::SetCursorPosX(8.f);
-    if (btn_red("  Logout  ", { sw - 16.f, 30.f }))
+    if (btn_red("  Logout  ", { sw - 16.f, 35.f }))
         bank_state::do_logout();
 
     ImGui::EndChild();
