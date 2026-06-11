@@ -3,10 +3,10 @@
 // Constructors initializer list 
 Person::Person() : id(0), name(""), password(""){} 
  
-Person::Person(int id, std::string name, std::string password) : id(id), name(name), password(utils::Security::stringHash(password)) {} 
+Person::Person(int id, string name, string password) : id(id), name(name), password(utils::Security::stringHash(password)) {} 
  
  
-void Person::setName(std::string name) 
+void Person::setName(string name) 
 { 
     this->name = name; 
 } 
@@ -16,17 +16,17 @@ void Person::setID(int id)
     this->id = id; 
 } 
  
-void Person::setPassword(std::string password) 
+void Person::setPassword(string password) 
 { 
     this->password = utils::Security::stringHash(password); 
 } 
  
-std::string Person::getName() const 
+string Person::getName() const 
 { 
     return name; 
 } 
  
-std::string Person::getPassword() const 
+string Person::getPassword() const 
 { 
     return password; 
 } 

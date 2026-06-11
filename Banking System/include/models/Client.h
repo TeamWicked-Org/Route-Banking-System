@@ -8,16 +8,16 @@ public:
 
 	// constructors
 	Client();
-	Client(std::string name, std::string password);
+	Client(string name, string password);
 
 	// Setters  --> Caller must handle the validation himself
-	void setName(std::string name);
-	void setPassword(std::string password);
+	void setName(string name);
+	void setPassword(string password);
 	void setBalance(double bal);
 
 	// Getters 
-	std::string getName() const override;
-	std::string getPassword() const override;
+	string getName() const override;
+	string getPassword() const override;
 	int getID() const override;
 	double getBalance() const;
 

@@ -1,34 +1,38 @@
 #include "../../include/models/Employee.h"
 
 // constructors
-Employee::Employee() : Person(/*ID*/ 0,/*name*/"",/*password*/"") {
-	salary = 0;
-}
+Employee::Employee()
+	: Person(0, "", ""), salary(0.0), role("") {}
 
-Employee::Employee(std::string name, std::string password) : Person(++Employee::id, name, password) {
-	salary = 0;
-}
+Employee::Employee(string name, string password,
+	string role, double salary)
+	: Person(++Employee::id, name, password),
+	role(role), salary(salary) {}
 
 // Setters  --> Caller must handle the validation himself
-void Employee::setName(std::string name) {
+void Employee::setName(string name) {
 	Person::setName(name);
 }
 
-void Employee::setPassword(std::string password) {
+void Employee::setPassword(string password) {
 	Person::setPassword(password);
 }
 
-void Employee::setsalary(double salary) {
+void Employee::setSalary(double salary) {
 	this->salary = salary;
 }
 
+void Employee::setRole(string role) {
+	this->role = role;
+}
+
 // Getters 
-std::string Employee::getName() const
+string Employee::getName() const
 {
 	return Person::getName();
 }
 
-std::string Employee::getPassword() const
+string Employee::getPassword() const
 {
 	return Person::getPassword();
 }
@@ -38,8 +42,12 @@ int Employee::getID() const
 	return Person::getID();
 }
 
-double Employee::getsalary() const {
+double Employee::getSalary() const {
 	return salary;
+}
+
+string Employee::getRole() const {
+	return role;
 }
 
 // Misc

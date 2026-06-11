@@ -6,17 +6,17 @@ Client::Client() : Person(/*ID*/ 0,/*name*/"",/*password*/"") {
 	balance = 0;
 }
 
-Client::Client(std::string name, std::string password) : Person(++Client::id, name, password) {
+Client::Client(string name, string password) : Person(++Client::id, name, password) {
 	balance = 0;
 }
 
 
 // Setters  --> Caller must handle the validation himself
-void Client::setName(std::string name) {
+void Client::setName(string name) {
 	Person::setName(name);
 }
 
-void Client::setPassword(std::string password) {
+void Client::setPassword(string password) {
 	Person::setPassword(password);
 }
 
@@ -26,12 +26,12 @@ void Client::setBalance(double bal) {
 
 
 // Getters 
-std::string Client::getName() const
+string Client::getName() const
 {
 	return Person::getName();
 }
 
-std::string Client::getPassword() const
+string Client::getPassword() const
 {
 	return Person::getPassword();
 }

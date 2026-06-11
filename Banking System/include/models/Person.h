@@ -8,22 +8,22 @@ class Person
 { 
 private: 
     int id; 
-    std::string name; 
-    std::string password; 
+    string name; 
+    string password; 
  
 public: 
   // Constructors 
     Person(); 
-    Person(int id, std::string name, std::string password); 
+    Person(int id, string name, string password); 
  
   // Setters 
-    void setName(std::string name);
+    void setName(string name);
     void setID(int id); 
-    void setPassword(std::string password); 
+    void setPassword(string password); 
  
   // Getters 
-    virtual std::string getName() const; 
-    virtual std::string getPassword() const; 
+    virtual string getName() const; 
+    virtual string getPassword() const; 
     virtual int getID() const; 
  
   // Display : Pure Virtual 
