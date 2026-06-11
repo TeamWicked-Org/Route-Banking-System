@@ -38,8 +38,25 @@ static IDXGISwapChain* g_sc = nullptr;
 static ID3D11RenderTargetView* g_rtv = nullptr;
 static HWND                    g_hwnd = nullptr;
 
+
 static constexpr int kW = 1080;
 static constexpr int kH = 720;
+
+
+static ID3D11ShaderResourceView* g_bgTexture = nullptr;
+static int g_winW = kW;
+static int g_winH = kH;
+static constexpr float kClear[4] = { 0.08f, 0.10f, 0.14f, 1.f }; // move out of WinMain
+
+// ── New helper: renders one complete frame ───────────────────────────────────
+static void render_frame()
+{
+    if (!g_rtv || !g_bgTexture) return;
+    g_ctx->OMSetRenderTargets(1, &g_rtv, nullptr);
+    g_ctx->ClearRenderTargetView(g_rtv, kClear);
+    banking_gui::tick(g_bgTexture, g_winW, g_winH);
+    g_sc->Present(1, 0);
+}
 
 static bool make_rtv()
 {
@@ -90,18 +107,21 @@ static LRESULT CALLBACK WndProc(HWND h, UINT msg, WPARAM w, LPARAM l)
     switch (msg) {
     case WM_SIZE:
         if (w != SIZE_MINIMIZED && g_dev && g_sc) {
-            // 1. Unbind FIRST so the context drops its internal reference
+            g_winW = LOWORD(l);
+            g_winH = HIWORD(l);
+
             if (g_ctx) {
                 g_ctx->OMSetRenderTargets(0, nullptr, nullptr);
-                g_ctx->Flush(); // flush any in-flight commands referencing the RTV
+                g_ctx->Flush();
             }
-            // 2. Now it's safe to release — ref count will actually hit zero
             if (g_rtv) { g_rtv->Release(); g_rtv = nullptr; }
-            // 3. ResizeBuffers now has zero outstanding references — won't fail
+
             HRESULT hr = g_sc->ResizeBuffers(
-                0, LOWORD(l), HIWORD(l), DXGI_FORMAT_UNKNOWN, 0);
-            if (SUCCEEDED(hr))
+                0, g_winW, g_winH, DXGI_FORMAT_UNKNOWN, 0);
+            if (SUCCEEDED(hr)) {
                 make_rtv();
+                render_frame(); // ← renders immediately, no black frame
+            }
         }
         return 0;
     case WM_CLOSE:
@@ -160,9 +180,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE,
     ShowWindow(g_hwnd, SW_SHOW);
     UpdateWindow(g_hwnd);
 
-    // Background clear colour matches ImGui window background
-    constexpr float kClear[4] = { 0.08f, 0.10f, 0.14f, 1.f };
-
     unsigned char* rgba_bgImg_data = stbi_load_from_memory(kImg_Image01, sizeof(kImg_Image01), &image_width, &image_height, &channels, 4);
 
     ID3D11ShaderResourceView* myTexture = nullptr;
@@ -199,6 +216,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE,
     }
     stbi_image_free(rgba_bgImg_data);
 
+    g_bgTexture = myTexture;
+
     MSG msg{};
     while (msg.message != WM_QUIT) {
         if (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -206,13 +225,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE,
             DispatchMessageW(&msg);
             continue;
         }
-        g_ctx->OMSetRenderTargets(1, &g_rtv, nullptr);
-        g_ctx->ClearRenderTargetView(g_rtv, kClear);
-        banking_gui::tick(myTexture, kW, kH);
-        g_sc->Present(1, 0);   // vsync
+        render_frame();
     }
 
-    if (myTexture) { myTexture->Release(); myTexture = nullptr; }
+    if (g_bgTexture) { g_bgTexture->Release(); g_bgTexture = nullptr; }
     banking_gui::shutdown(g_hwnd);
     free_d3d11();
     UnregisterClassW(L"BankingSystemWnd", hInst);
