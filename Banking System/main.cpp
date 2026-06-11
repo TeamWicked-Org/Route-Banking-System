@@ -21,7 +21,7 @@
 
 // Static ID counters (one translation unit must own these)
 int Client::id = 0;
-//int Employee::id = 0;
+int Employee::id = 0;
 
 // ImGui Win32 message handler (defined inside imgui_impl_win32.cpp)
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
@@ -35,8 +35,8 @@ static IDXGISwapChain* g_sc = nullptr;
 static ID3D11RenderTargetView* g_rtv = nullptr;
 static HWND                    g_hwnd = nullptr;
 
-static constexpr int kW = 960;
-static constexpr int kH = 680;
+static constexpr int kW = 1080;
+static constexpr int kH = 720;
 
 static bool make_rtv()
 {
@@ -56,7 +56,7 @@ static bool init_d3d11()
     sd.BufferDesc.Width = kW;
     sd.BufferDesc.Height = kH;
     sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    sd.BufferDesc.RefreshRate = { 60, 1 };
+    sd.BufferDesc.RefreshRate = { 180, 1 };     // FPS Controller
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     sd.OutputWindow = g_hwnd;
     sd.SampleDesc.Count = 1;

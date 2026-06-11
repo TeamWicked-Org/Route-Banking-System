@@ -59,6 +59,7 @@ namespace bank_state {
 // =============================================================================
 // Helpers
 // =============================================================================
+// Money Formatter
 static std::string fmt_money(double v) {
     std::ostringstream ss;
     ss << "$" << std::fixed << std::setprecision(2) << v;
@@ -67,9 +68,9 @@ static std::string fmt_money(double v) {
 
 // Colour-tinted buttons
 static bool btn_green(const char* lbl, ImVec2 sz = { 0,0 }) {
-    ImGui::PushStyleColor(ImGuiCol_Button, { 0.09f,0.47f,0.19f,1.f });
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.13f,0.61f,0.26f,1.f });
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.07f,0.35f,0.14f,1.f });
+    ImGui::PushStyleColor(ImGuiCol_Button, {0.0706f, 0.3647f, 0.149f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, {0.1216f, 0.6157f, 0.2549f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, {0.051f, 0.3137f, 0.1176f, 1.0f});
     bool r = ImGui::Button(lbl, sz);
     ImGui::PopStyleColor(3);
     return r;
@@ -123,8 +124,10 @@ static void modal_add_client()
         ImGui::OpenPopup("Add Client");
         bank_state::open_add_client = false;
     }
+    ImGui::SetNextWindowSize(ImVec2(400.f, 280.f));
     if (!ImGui::BeginPopupModal("Add Client", nullptr,
-        ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) return;
+        //ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) return;
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) return;
 
     static char name_buf[64] = {};
     static char pass_buf[64] = {};
@@ -969,6 +972,8 @@ void banking_gui::tick()
         { " Employees", bank_state::View::Employees },
         { " Admin",     bank_state::View::Admin     },
     };
+    // Positioning
+    ImGui::Indent();
     for (const auto& n : nav) {
         bool active = (bank_state::current_view == n.view);
         ImGui::PushStyleColor(ImGuiCol_Button,
@@ -977,11 +982,12 @@ void banking_gui::tick()
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
             active ? ImVec4{ 0.19f,0.44f,0.86f,1.f }
         : ImVec4{ 0.12f,0.16f,0.24f,1.f });
-        if (ImGui::Button(n.label, { sw - 16.f, 38.f }))
+        if (ImGui::Button(n.label, { sw - 40.f, 38.f }))
             bank_state::current_view = n.view;
         ImGui::PopStyleColor(2);
         ImGui::Spacing();
     }
+    ImGui::Unindent();
 
     // Toast at bottom of sidebar
     if (bank_state::status_timer > 0.f) {
