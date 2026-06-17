@@ -56,3 +56,8 @@ void Employee::display() const {
 	cout << "Name: " << getName() << endl;
 	cout << "Salary: " << salary << endl;
 }
+
+
+void Employee::decreaseStaticID() {
+	Employee::id -= 1;
+}

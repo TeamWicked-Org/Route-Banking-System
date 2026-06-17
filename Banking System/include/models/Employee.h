@@ -30,4 +30,6 @@ public:
 	// Misc
 	void display() const override;
 
+	static void decreaseStaticID();
+
 };

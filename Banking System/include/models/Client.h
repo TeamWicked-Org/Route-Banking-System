@@ -32,6 +32,8 @@ public:
 
 	void checkBalance() const;
 
+	static void decreaseStaticID() ;
+
 };
 
 

@@ -77,3 +77,7 @@ void Client::checkBalance() const {
 	cout << "Client Name: " << getName() << endl;
 	cout << "Client Balance: " << getBalance() << endl;
 }
+
+void Client::decreaseStaticID() {
+	Client::id -= 1;
+}
