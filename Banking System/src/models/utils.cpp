@@ -107,7 +107,7 @@ namespace utils {
 	}
 
 	// String Hash
-	std::string Security::stringHash(std::string str) {
+	std::string Security::stringHash(const std::string& str) {
 		const uint8_t* data = reinterpret_cast<const uint8_t*>(str.data());
 		std::vector<uint8_t> digest = sha256(data, str.size());
 

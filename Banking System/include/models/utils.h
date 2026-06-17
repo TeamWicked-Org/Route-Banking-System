@@ -103,7 +103,7 @@ namespace utils {
 		// delete assingment operator
 		Security& operator=(const Security&) = delete;
 
-		static std::string stringHash(std::string str);
+		static std::string stringHash(const std::string& str);
 
 	};
 }  // namespace utils
