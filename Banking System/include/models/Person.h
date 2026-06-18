@@ -3,18 +3,18 @@
 #include <iostream> 
 #include <string> 
 using namespace std; 
- 
+
 class Person 
 { 
-private: 
-    int id; 
-    string name; 
-    string password; 
+private:
+    int id;
+    string name;
+    string password;
  
-public: 
+public:
   // Constructors 
-    Person(); 
-    Person(int id, string name, string password); 
+    Person();
+    Person(int id, string name, string password); // Parameterized
  
   // Setters 
     void setName(string name);
@@ -22,12 +22,12 @@ public:
     void setPassword(string password); 
  
   // Getters 
-    virtual string getName() const; 
-    virtual string getPassword() const; 
-    virtual int getID() const; 
+    string getName() const; 
+    string getPassword() const; 
+    int getID() const; 
  
   // Display : Pure Virtual 
-    virtual void display() const = 0; 
+    virtual void display() const = 0;
  
 }; 
  

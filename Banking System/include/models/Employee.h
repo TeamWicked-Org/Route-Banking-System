@@ -5,25 +5,25 @@ class Employee : public Person {
 private:
 	static int id;
 	double salary;
-	string role;
+	string position;
 
 public:
 
 	// constructors
 	Employee();
 	Employee(string name, string password,
-			 string role, double salary);
+			 string position, double salary);
 
 	// Setters  --> Caller must handle the validation himself
 	void setName(string name);
 	void setPassword(string password);
 	void setSalary(double salary);
-	void setRole(string role);
+	void setPosition(string position);
 
-	// Getters 
-	string getName() const override;
-	string getPassword() const override;
-	int getID() const override;
+	// Getters
+	string getName() const;
+	string getPassword() const;
+	int getID() const;
 	double getSalary() const;
 	string getRole() const;
 

@@ -467,7 +467,7 @@ static void modal_deposit()
         ImGui::InputDouble("##dep", &amount, 100.0, 1000.0, "%.2f");
 
         ImGui::Unindent();
-        if (amount < 0.01) amount = 0.01;
+        if (amount < 1.0) amount = 1.0;
         ImGui::Spacing();
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
@@ -513,7 +513,7 @@ static void modal_withdraw()
         ImGui::SetNextItemWidth(150.f);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.f); ImGui::SameLine();
         ImGui::InputDouble("##wd", &amount, 100.0, 1000.0, "%.2f");
-        if (amount < 0.01) amount = 0.01;
+        if (amount < 1.0) amount = 1.0;
         if (err[0]) {
             ImGui::Spacing();
             ImGui::PushStyleColor(ImGuiCol_Text, { 1.f,0.4f,0.4f,1.f });
@@ -573,7 +573,7 @@ static void modal_transfer()
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 10.f); ImGui::SameLine();
         ImGui::InputDouble("##tr_amt", &amount, 100.0, 1000.0, "%.2f");
 
-        if (amount < 0.01) amount = 0.01;
+        if (amount < 1.0) amount = 1.0;
         ImGui::Text("To:");    ImGui::SameLine(90.f); ImGui::SetNextItemWidth(210.f);
         std::string prev_label = (target_idx >= 0 && target_idx < (int)bank_state::clients.size())
             ? bank_state::clients[target_idx].getName()
@@ -1028,7 +1028,7 @@ static void view_employees(float w, float h)
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 52.f);
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 1.f);
-        ImGui::TableSetupColumn("Role", ImGuiTableColumnFlags_WidthStretch, 0.6f);
+        ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_WidthStretch, 0.6f);
         ImGui::TableSetupColumn("Salary", ImGuiTableColumnFlags_WidthFixed, 120.f);
         ImGui::TableHeadersRow();
         for (int i = 0; i < (int)employees.size(); ++i) {

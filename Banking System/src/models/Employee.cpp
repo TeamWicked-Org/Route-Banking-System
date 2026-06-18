@@ -2,12 +2,12 @@
 
 // constructors
 Employee::Employee()
-	: Person(0, "", ""), salary(0.0), role("") {}
+	: Person(0, "", ""), salary(0.0), position("") {}
 
 Employee::Employee(string name, string password,
-	string role, double salary)
+	string position, double salary)
 	: Person(++Employee::id, name, password),
-	role(role), salary(salary) {}
+	position(position), salary(salary) {}
 
 // Setters  --> Caller must handle the validation himself
 void Employee::setName(string name) {
@@ -22,8 +22,8 @@ void Employee::setSalary(double salary) {
 	this->salary = salary;
 }
 
-void Employee::setRole(string role) {
-	this->role = role;
+void Employee::setPosition(string position) {
+	this->position = position;
 }
 
 // Getters 
@@ -47,7 +47,7 @@ double Employee::getSalary() const {
 }
 
 string Employee::getRole() const {
-	return role;
+	return position;
 }
 
 // Misc

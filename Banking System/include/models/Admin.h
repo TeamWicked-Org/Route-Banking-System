@@ -7,6 +7,4 @@ public:
     Admin();
     Admin(std::string name, std::string password);
 
-    // Display
-    void display() const override;
 };

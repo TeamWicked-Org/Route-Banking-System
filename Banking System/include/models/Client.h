@@ -16,10 +16,10 @@ public:
 	void setBalance(double bal);
 
 	// Getters 
-	string getName() const override;
-	string getPassword() const override;
-	int getID() const override;
-	double getBalance() const;
+	string getName() const ;
+	string getPassword() const ;
+	int getID() const ;
+	double getBalance() const ;
 
 	// Misc
 	void display() const override;
