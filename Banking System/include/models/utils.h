@@ -5,22 +5,31 @@
 #include <windows.h>
 #include <bcrypt.h>
 #include <string>
-#include <sstream>
 #include <iomanip>
 #include <vector>
 #include <cstdint>
+#include <fstream>
+#include <sstream>
+#include <iostream> 
+using namespace std;
 
 // includes dependency library for #include <bcrypt.h>
 #pragma comment(lib, "bcrypt.lib")
 
+// Forward declaration to build the functions signature
+class Client;
+class Employee;
+class Admin;
+
 // Utils Namespace
 namespace utils {
+
 
 	// Validation Class
 	// ====================================
 	class Validation final {
 	private:
-		struct validationConstraints {
+		const struct validationConstraints {
 			// name constraints
 			int minNameSize = 3;
 			int maxNameSize = 20;
@@ -106,4 +115,93 @@ namespace utils {
 		static std::string stringHash(const std::string& str);
 
 	};
+
+
+
+	//
+	// FileHelper Class
+	// ====================================
+
+	class FileHelper final {
+
+	private:
+		const struct databaseFileNames {
+			// Clients
+			std::string clientDB = "Clients.txt";
+			std::string clientID_DB = "Clients_ids.bin";
+
+			// Employees
+			std::string employeeDB = "Employees.txt";
+			std::string employeeID_DB = "Employees_ids.bin";
+
+			// Admins
+			std::string adminDB = "Admins.txt";
+
+			char formattingDelimiter = '-';
+		};
+
+
+	public:
+		enum class userType { Client, Employee, Admin };
+
+		// delete constructors to prevent instance creations
+		FileHelper() = delete;
+
+		// delete copy constructor
+		FileHelper(const FileHelper&) = delete;
+
+		// delete assingment operator
+		FileHelper& operator=(const FileHelper&) = delete;
+
+		// getters
+		static databaseFileNames get_DB_Struct();
+
+		// Misc
+
+		static void saveLast(std::string IDS_DatabaseFile, int id);		// will save the current static id to the file (will use binary mode as a simple anti-modification layer)
+
+		static int getLast(std::string IDS_DatabaseFile);	// get's the last saved id to set the static id in memory to match it
+
+		static void saveClient(Client c);
+
+		static void saveEmployee(Employee e);
+
+		static void fetchClients();
+		static void fetchEmployees();
+		static void fetchAdmins();
+		static void clearFile(std::string filename);			// Clears specific file sent as parameter
+		static void clearAllRecords(userType uT);				// Clears all User type Record Files
+
+	};
+
+
+	//
+	// Parser Class
+	// ====================================
+
+	class Parser {
+	private:
+
+	public:
+		static char formattingDelimiter;
+
+		// delete constructors to prevent instance creations
+		Parser() = delete;
+
+		// delete copy constructor
+		Parser(const Parser&) = delete;
+
+		// delete assingment operator
+		Parser& operator=(const Parser&) = delete;
+
+
+		static vector<std::string> split(std::string& line);
+		static Client parseToClient(std::string& line);
+		static Employee parseToEmployee(std::string& line);
+		static Admin parseToAdmin(std::string& line);
+
+
+
+	};
+
 }  // namespace utils

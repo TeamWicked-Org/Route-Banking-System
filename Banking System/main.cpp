@@ -22,9 +22,6 @@
 #include "external/imgLib/stb_image.h"
 #include "include/images/images.h"
 
-// Static ID counters (one translation unit must own these)
-int Client::id = 0;
-int Employee::id = 0;
 
 // ImGui Win32 message handler (defined inside imgui_impl_win32.cpp)
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);

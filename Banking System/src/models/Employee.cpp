@@ -1,5 +1,10 @@
 #include "../../include/models/Employee.h"
 
+
+// Static ID counter
+int Employee::id = 0;
+vector<Employee> Employee::employeeList{};
+
 // constructors
 Employee::Employee()
 	: Person(0, "", ""), salary(0.0), position("") {}
@@ -26,6 +31,15 @@ void Employee::setPosition(string position) {
 	this->position = position;
 }
 
+void Employee::setEmployeeList(vector<Employee> e) {
+	employeeList = e;
+}
+
+
+void Employee::setGlobalID(int d) {
+	id = d;
+}
+
 // Getters 
 string Employee::getName() const
 {
@@ -48,6 +62,10 @@ double Employee::getSalary() const {
 
 string Employee::getRole() const {
 	return position;
+}
+
+vector<Employee> Employee::getEmployeeList() const {
+	return employeeList;
 }
 
 // Misc

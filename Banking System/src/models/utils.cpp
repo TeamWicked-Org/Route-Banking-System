@@ -1,6 +1,10 @@
 #include "../../include/models/utils.h"
+#include "../../include/models/Client.h"
+#include "../../include/models/Employee.h"
+#include "../../include/models/Admin.h"
 
 namespace utils {
+
 
 	// Validation Class Section
 	// ===========================
@@ -118,4 +122,147 @@ namespace utils {
 		return oss.str(); // 64-char hex string
 	}
 	// =========================== Security Class
+
+
+	// FileHelper Class Section
+	// ===========================
+
+	// set userType for clear all records function
+	static FileHelper::userType        current_Type = FileHelper::userType::Client;
+
+	// getters
+	FileHelper::databaseFileNames FileHelper::get_DB_Struct() {
+		databaseFileNames tmp;
+		return tmp;
+	}
+
+	// Misc
+
+	void FileHelper::saveLast(std::string IDS_DatabaseFile, int id) {		// will save the current static id to the file
+		// ofstream uses RAII -> Resource Acquisition Is Initialization which mean it's destructor will automatically close the file
+		// once the variable (id_file) get's out of scope
+
+		ofstream id_file(IDS_DatabaseFile,  ios::binary);
+		if (!id_file) return;
+		id_file.write(
+		    reinterpret_cast<const char*>(&id),			// & is because the write function needs the address itself of the variable to copy it's value as bytes inside the file
+		    sizeof(id)
+		);
+	}
+	
+	int FileHelper::getLast(std::string IDS_DatabaseFile) {		// get's the last saved id to set the static id in memory to match it
+
+		ifstream id_file(IDS_DatabaseFile, ios::binary);
+		if (!id_file) return -1;
+		int tmpID{};
+		id_file.read(
+			reinterpret_cast<char*>(&tmpID),
+			sizeof(tmpID)
+		);
+		return tmpID;
+
+	}
+	
+	void FileHelper::saveClient(Client c) {
+		databaseFileNames filesStruct = get_DB_Struct();
+		ofstream info_file(filesStruct.clientDB, ios::app);
+		if (!info_file) return;
+		info_file << c.getID() << filesStruct.formattingDelimiter
+				  << c.getName() << filesStruct.formattingDelimiter
+				  << c.getPassword() << filesStruct.formattingDelimiter
+				  << std::fixed << std::setprecision(2) << c.getBalance() << '\n';
+	}
+	
+	void FileHelper::saveEmployee(Employee e) {
+		databaseFileNames filesStruct = get_DB_Struct();
+		ofstream info_file(filesStruct.employeeDB, ios::app);
+		if (!info_file) return;
+		info_file << e.getID() << filesStruct.formattingDelimiter
+			<< e.getName() << filesStruct.formattingDelimiter
+			<< e.getPassword() << filesStruct.formattingDelimiter
+			<< std::fixed << std::setprecision(2) << e.getSalary() << '\n';
+
+	}
+	
+	void FileHelper::fetchClients() {
+		databaseFileNames filesStruct = get_DB_Struct();
+		ifstream info_file(filesStruct.clientDB, ios::in);
+		if (!info_file) { ofstream createIfNotFound(filesStruct.clientDB, ios::out); return; }
+		string tmpLine;
+		vector<Client> cTmpVec;
+		while (getline(info_file, tmpLine))
+		{
+			cTmpVec.push_back(Parser::parseToClient(tmpLine));
+		}
+		Client::setClientList(cTmpVec);
+		info_file.close();
+		if (FileHelper::getLast(filesStruct.clientID_DB) != -1)
+			Client::setGlobalID(FileHelper::getLast(filesStruct.clientID_DB));
+
+	}
+	void FileHelper::fetchEmployees() {
+
+	}
+	void FileHelper::fetchAdmins() {
+
+	}
+	void FileHelper::clearFile(std::string filename) {	// Clears specific file sent as parameter
+		fstream file_to_clear(filename, ios::trunc);
+		file_to_clear.close();
+	}
+	void FileHelper::clearAllRecords(userType uT) {		// Clears all User type Record Files
+	
+	
+	}
+
+
+	// =========================== FileHelper Class
+
+
+	// Parser Class Section
+	// ===========================
+
+	char Parser::formattingDelimiter = '-';
+
+	vector<std::string> Parser::split(std::string& line) {
+		vector<std::string> tmpVec;
+		stringstream ss(line);
+		std::string token;
+		while (getline(ss, token, Parser::formattingDelimiter))
+		{
+			tmpVec.push_back(token);
+		}
+		return tmpVec;
+
+	}
+
+	Client Parser::parseToClient(std::string& line) {
+		vector<std::string> initStrVec = split(line);
+		Client newClient(initStrVec[1], initStrVec[2]);
+		newClient.setBalance(stod(initStrVec[3]));
+		newClient.setID(stoi(initStrVec[0]));
+		Client::decreaseStaticID();
+		return newClient;
+	}
+
+	Employee Parser::parseToEmployee(std::string& line) {
+		vector<std::string> initStrVec = split(line);
+		Employee newEmp(initStrVec[1], initStrVec[2], initStrVec[3],0.0);
+		newEmp.setSalary(stod(initStrVec[4]));
+		newEmp.setID(stoi(initStrVec[0]));
+		Employee::decreaseStaticID();
+		return newEmp;
+	}
+
+	Admin Parser::parseToAdmin(std::string& line) {
+		vector<std::string> initStrVec = split(line);
+		Admin newAdmin(initStrVec[1], initStrVec[2]);
+		newAdmin.setID(stoi(initStrVec[0]));
+		Admin::decreaseStaticID();
+		return newAdmin;
+	}
+
+
+	// =========================== Parser Class
+
 }

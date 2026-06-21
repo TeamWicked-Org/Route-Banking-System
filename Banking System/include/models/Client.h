@@ -1,10 +1,14 @@
 #pragma once
 #include "Person.h"
 class Client : public Person {
+
 private:
 	static int id;
 	double balance;
+	static vector<Client> clientsList;
+
 public:
+
 
 	// constructors
 	Client();
@@ -14,12 +18,15 @@ public:
 	void setName(string name);
 	void setPassword(string password);
 	void setBalance(double bal);
+	static void setClientList(vector<Client> c);
+	static void setGlobalID(int d);
 
 	// Getters 
 	string getName() const ;
 	string getPassword() const ;
 	int getID() const ;
 	double getBalance() const ;
+	static vector<Client>& getClientList();
 
 	// Misc
 	void display() const override;

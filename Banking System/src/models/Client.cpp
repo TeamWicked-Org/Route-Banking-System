@@ -1,5 +1,9 @@
 #include "../../include/models/Client.h"
 
+// Static ID counter
+int Client::id = 0;
+
+vector<Client> Client::clientsList{};
 
 // constructors
 Client::Client() : Person(/*ID*/ 0,/*name*/"",/*password*/"") {
@@ -24,6 +28,13 @@ void Client::setBalance(double bal) {
 	balance = bal;
 }
 
+void Client::setClientList(vector<Client> c) {
+	clientsList = c;
+}
+
+void Client::setGlobalID(int d) {
+	id = d;
+}
 
 // Getters 
 string Client::getName() const
@@ -43,6 +54,10 @@ int Client::getID() const
 
 double Client::getBalance() const {
 	return balance;
+}
+
+vector<Client>& Client::getClientList() {
+	return clientsList;
 }
 
 // Misc

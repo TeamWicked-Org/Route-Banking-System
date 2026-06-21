@@ -1,8 +1,5 @@
 #pragma once 
 #include "utils.h" 
-#include <iostream> 
-#include <string> 
-using namespace std; 
 
 class Person 
 { 

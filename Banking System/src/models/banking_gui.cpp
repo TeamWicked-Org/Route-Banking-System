@@ -63,7 +63,7 @@ namespace bank_state {
     static bool is_logged_in() { return current_role != Role::None; }
 
     // ── Data ──────────────────────────────────────────────────
-    static std::vector<Client>   clients;
+    std::vector<Client>   clients;
     static std::vector<Employee> employees;
     static std::vector<Admin>    admins;
 
@@ -1228,10 +1228,13 @@ bool banking_gui::init(HWND hwnd, ID3D11Device* dev, ID3D11DeviceContext* ctx)
     ImGui_ImplDX11_Init(dev, ctx);
 
     // ── Seed demo data ────────────────────────────────────────
-    bank_state::clients.emplace_back("Alice Smith", "password001"); bank_state::clients.back().setBalance(8500.0);
-    bank_state::clients.emplace_back("Bob Johnson", "password002"); bank_state::clients.back().setBalance(22000.0);
-    bank_state::clients.emplace_back("Carol White", "password003"); bank_state::clients.back().setBalance(3200.0);
-    bank_state::clients.emplace_back("Daniel Brown", "password004"); bank_state::clients.back().setBalance(15750.0);
+    //bank_state::clients.emplace_back("Alice Smith", "password001"); bank_state::clients.back().setBalance(8500.0);
+    //bank_state::clients.emplace_back("Bob Johnson", "password002"); bank_state::clients.back().setBalance(22000.0);
+    //bank_state::clients.emplace_back("Carol White", "password003"); bank_state::clients.back().setBalance(3200.0);
+    //bank_state::clients.emplace_back("Daniel Brown", "password004"); bank_state::clients.back().setBalance(15750.0);
+
+    utils::FileHelper::fetchClients();
+    bank_state::clients = Client::getClientList();
 
     bank_state::employees.emplace_back("Emma Davis", "emppass001", "Teller", 6500.0);
     bank_state::employees.emplace_back("Frank Miller", "emppass002", "Senior Teller", 8000.0);
