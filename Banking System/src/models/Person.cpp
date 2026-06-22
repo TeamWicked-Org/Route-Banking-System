@@ -20,6 +20,11 @@ void Person::setPassword(string password)
 { 
     this->password = utils::Security::stringHash(password); 
 } 
+
+void Person::setPasswordRaw(string hashedPassword)
+{
+    this->password = hashedPassword;
+}
  
 string Person::getName() const 
 { 

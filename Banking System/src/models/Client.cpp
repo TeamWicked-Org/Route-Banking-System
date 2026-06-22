@@ -52,6 +52,11 @@ int Client::getID() const
 	return Person::getID();
 }
 
+int Client::getGlobalID()
+{
+	return Client::id;
+}
+
 double Client::getBalance() const {
 	return balance;
 }

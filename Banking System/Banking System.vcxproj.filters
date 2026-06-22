@@ -108,4 +108,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="To Do.txt" />
+  </ItemGroup>
 </Project>

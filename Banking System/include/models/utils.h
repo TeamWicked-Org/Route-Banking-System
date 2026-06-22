@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream> 
+#include <filesystem> 
 using namespace std;
 
 // includes dependency library for #include <bcrypt.h>
@@ -125,7 +126,7 @@ namespace utils {
 	class FileHelper final {
 
 	private:
-		const struct databaseFileNames {
+		struct databaseFileNames {
 			// Clients
 			std::string clientDB = "Clients.txt";
 			std::string clientID_DB = "Clients_ids.bin";
@@ -137,12 +138,10 @@ namespace utils {
 			// Admins
 			std::string adminDB = "Admins.txt";
 
-			char formattingDelimiter = '-';
 		};
 
 
 	public:
-		enum class userType { Client, Employee, Admin };
 
 		// delete constructors to prevent instance creations
 		FileHelper() = delete;
@@ -166,11 +165,14 @@ namespace utils {
 
 		static void saveEmployee(Employee e);
 
+		static void saveAdmin(Admin a);
+
 		static void fetchClients();
 		static void fetchEmployees();
 		static void fetchAdmins();
-		static void clearFile(std::string filename);			// Clears specific file sent as parameter
-		static void clearAllRecords(userType uT);				// Clears all User type Record Files
+		static void clearInfoFile(std::string filename);			// Clears specific file sent as parameter
+		static void clearIDFile(std::string filename);			// Clears specific file sent as parameter
+
 
 	};
 
@@ -183,7 +185,6 @@ namespace utils {
 	private:
 
 	public:
-		static char formattingDelimiter;
 
 		// delete constructors to prevent instance creations
 		Parser() = delete;

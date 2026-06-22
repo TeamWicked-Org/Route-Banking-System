@@ -17,7 +17,8 @@ public:
     void setName(string name);
     void setID(int id); 
     void setPassword(string password); 
- 
+    void setPasswordRaw(string hashedPassword);
+
   // Getters 
     string getName() const; 
     string getPassword() const; 

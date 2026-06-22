@@ -27,6 +27,7 @@ public:
 	int getID() const ;
 	double getBalance() const ;
 	static vector<Client>& getClientList();
+	static int getGlobalID();
 
 	// Misc
 	void display() const override;

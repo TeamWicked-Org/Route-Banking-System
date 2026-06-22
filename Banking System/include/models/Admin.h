@@ -10,7 +10,7 @@ public:
     Admin(std::string name, std::string password);
 
 
-    void setAdminList(vector<Admin> a);
-    vector<Admin> getAdminList() const;
+    static void setAdminList(vector<Admin> a);
+    static vector<Admin> getAdminList() ;
 
 };

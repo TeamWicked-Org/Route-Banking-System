@@ -20,7 +20,7 @@ public:
 	void setPassword(string password);
 	void setSalary(double salary);
 	void setPosition(string position);
-	void setEmployeeList(vector<Employee> e);
+	static void setEmployeeList(vector<Employee> e);
 	static void setGlobalID(int d);
 
 	// Getters
@@ -29,7 +29,8 @@ public:
 	int getID() const;
 	double getSalary() const;
 	string getRole() const;
-	vector<Employee> getEmployeeList() const;
+	static vector<Employee> getEmployeeList();
+	static int getGlobalID();
 
 	// Misc
 	void display() const override;

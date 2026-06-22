@@ -56,6 +56,11 @@ int Employee::getID() const
 	return Person::getID();
 }
 
+int Employee::getGlobalID()
+{
+	return Employee::id;
+}
+
 double Employee::getSalary() const {
 	return salary;
 }
@@ -64,7 +69,7 @@ string Employee::getRole() const {
 	return position;
 }
 
-vector<Employee> Employee::getEmployeeList() const {
+vector<Employee> Employee::getEmployeeList() {
 	return employeeList;
 }
 
