@@ -167,6 +167,8 @@ namespace utils {
 
 		static void saveAdmin(Admin a);
 
+		static void updateClient(Client c);
+
 		static void fetchClients();
 		static void fetchEmployees();
 		static void fetchAdmins();

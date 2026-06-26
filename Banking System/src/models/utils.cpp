@@ -250,6 +250,53 @@ namespace utils {
 			<< std::fixed << std::setprecision(2) << a.getSalary() << '\n';
 
 	}
+
+
+	// Passed client is already updated
+	void FileHelper::updateClient(Client c) {
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+
+		// opens the info DB in append mode to add a employee at the end
+		ifstream info_file(filesStruct.clientDB, ios::in);
+
+		// do nothing if the file can't be opened
+		if (!info_file) return;
+
+		vector<string> lines;		//  used to rebuild the full file
+		string line;
+		int targetLine = 0, counter = 0;
+		while (getline(info_file,line))
+		{
+			lines.push_back(line);
+			if (Parser::split(line)[0] == to_string(c.getID()))
+			{
+				targetLine = counter;
+			}
+			counter++;
+		}
+
+		info_file.close();
+		stringstream s;
+		s << c.getID() << "-" << c.getName() << "-" << c.getPassword() << "-" << std::fixed << std::setprecision(2) << c.getBalance();
+		lines[targetLine] = s.str();
+
+		ofstream info_file2(filesStruct.clientDB,  ios::trunc);
+		if (!info_file2)
+			return;
+
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			info_file2 << lines[i];
+
+			//if (i != lines.size() - 1)
+				info_file2 << '\n';
+		}
+
+		info_file2.close();
+
+	}
 	
 
 	void FileHelper::fetchClients() {
@@ -363,7 +410,8 @@ namespace utils {
 
 
 	// Parser Class Section
-	// ===========================
+	// =====================
+
 
 	vector<std::string> Parser::split(std::string& line) {
 		// Create tmp vector of type string
