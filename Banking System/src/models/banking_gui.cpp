@@ -622,7 +622,9 @@ static void modal_deposit()
         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x / 2) - 100.f);
         if (btn_green("Deposit", { 100.f,0.f })) {
             c.deposit(amount); bank_state::set_status("Deposit successful.");
-            utils::FileHelper::updateClient(c);
+            vector<pair<Client, int>> tmp;
+            tmp.push_back({ c, 0 });
+            utils::FileHelper::updateClient(tmp);
             amount = 500.0; ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
@@ -680,7 +682,9 @@ static void modal_withdraw()
             if (amount > c.getBalance()) strncpy_s(err, sizeof err, "Insufficient balance.", _TRUNCATE);
             else {
                 c.withdraw(amount); bank_state::set_status("Withdrawal successful.");
-                utils::FileHelper::updateClient(c);
+                vector<pair<Client, int>> tmp;
+                tmp.push_back({ c, 0 });
+                utils::FileHelper::updateClient(tmp);
                 amount = 200.0; err[0] = '\0'; ImGui::CloseCurrentPopup();
             }
         }
@@ -764,6 +768,10 @@ static void modal_transfer()
                 strncpy_s(err, sizeof err, "Insufficient balance.", _TRUNCATE);
             else {
                 from.transferTo(amount, bank_state::clients[target_idx]);
+                vector<pair<Client, int>> tmp;
+                tmp.push_back({ from, 0 });
+                tmp.push_back({ bank_state::clients[target_idx], 0 });
+                utils::FileHelper::updateClient(tmp);
                 bank_state::set_status("Transfer completed.");
                 amount = 200.0; target_idx = -1; err[0] = '\0'; ImGui::CloseCurrentPopup();
             }

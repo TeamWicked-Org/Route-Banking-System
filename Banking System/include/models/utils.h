@@ -167,7 +167,7 @@ namespace utils {
 
 		static void saveAdmin(Admin a);
 
-		static void updateClient(Client c);
+		static void updateClient(vector<pair<Client,int>>& cVec);
 
 		static void fetchClients();
 		static void fetchEmployees();

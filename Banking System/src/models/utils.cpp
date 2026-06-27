@@ -253,7 +253,7 @@ namespace utils {
 
 
 	// Passed client is already updated
-	void FileHelper::updateClient(Client c) {
+	void FileHelper::updateClient(vector<pair<Client, int>>& cVec) {
 		// get's database info from the file helper
 		databaseFileNames filesStruct = get_DB_Struct();
 
@@ -265,21 +265,28 @@ namespace utils {
 
 		vector<string> lines;		//  used to rebuild the full file
 		string line;
-		int targetLine = 0, counter = 0;
+		int counter = 0;
 		while (getline(info_file,line))
 		{
 			lines.push_back(line);
-			if (Parser::split(line)[0] == to_string(c.getID()))
-			{
-				targetLine = counter;
+			for (auto& item : cVec) {
+				if (Parser::split(line)[0] == to_string(item.first.getID()))
+				{
+					item.second = counter;
+				}
 			}
 			counter++;
 		}
 
 		info_file.close();
 		stringstream s;
-		s << c.getID() << "-" << c.getName() << "-" << c.getPassword() << "-" << std::fixed << std::setprecision(2) << c.getBalance();
-		lines[targetLine] = s.str();
+
+		for (auto& item : cVec) {
+			s.str("");		// String stream must be cleared on every loop cycle
+			s << item.first.getID() << "-" << item.first.getName() << "-" << item.first.getPassword() << "-" << std::fixed << std::setprecision(2) << item.first.getBalance();
+			lines[item.second] = s.str();
+		}
+
 
 		ofstream info_file2(filesStruct.clientDB,  ios::trunc);
 		if (!info_file2)
@@ -290,7 +297,6 @@ namespace utils {
 		{
 			info_file2 << lines[i];
 
-			//if (i != lines.size() - 1)
 				info_file2 << '\n';
 		}
 
