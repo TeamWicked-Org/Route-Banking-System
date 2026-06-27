@@ -1,5 +1,5 @@
-1-Mohamed-password001-2000.00
-2-Rahma-password002-3000.00
+1-Mohamed-password001-1000.00
+2-Rahma-password002-4000.00
 3-Habiba-password002-2000
 4-Renad-password002-2000
 5-Mohamed-password002-2000

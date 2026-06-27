@@ -169,6 +169,8 @@ namespace utils {
 
 		static void updateClient(vector<pair<Client,int>>& cVec);
 
+		static void updateEmployee(vector<pair<Employee,int>>& eVec);
+
 		static void fetchClients();
 		static void fetchEmployees();
 		static void fetchAdmins();

@@ -951,7 +951,14 @@ static void modal_set_salary()
         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x / 4));
         if (btn_amber("Update", { 100.f,0.f })) {
             if (!utils::Validation::validateSalary(new_sal)) strncpy_s(err, sizeof err, "Salary below minimum ($5000).", _TRUNCATE);
-            else { e.setSalary(new_sal); bank_state::set_status("Salary updated."); new_sal = 5000.0; err[0] = '\0'; ImGui::CloseCurrentPopup(); }
+            else { 
+                e.setSalary(new_sal);
+                vector<pair<Employee, int>> tmp;
+                tmp.push_back({ e, 0 });
+                utils::FileHelper::updateEmployee(tmp);
+                bank_state::set_status("Salary updated.");
+                new_sal = 5000.0; err[0] = '\0';
+                ImGui::CloseCurrentPopup(); }
         }
         ImGui::SameLine();
     }

@@ -263,7 +263,7 @@ namespace utils {
 		// do nothing if the file can't be opened
 		if (!info_file) return;
 
-		vector<string> lines;		//  used to rebuild the full file
+		vector<string> lines;		//  used to rebuild the full file  (Old File Copy --> To Be Modified)
 		string line;
 		int counter = 0;
 		while (getline(info_file,line))
@@ -283,9 +283,11 @@ namespace utils {
 
 		for (auto& item : cVec) {
 			s.str("");		// String stream must be cleared on every loop cycle
-			s << item.first.getID() << "-" << item.first.getName() << "-" << item.first.getPassword() << "-" << std::fixed << std::setprecision(2) << item.first.getBalance();
+			s << item.first.getID() << "-" << item.first.getName() << "-" << item.first.getPassword() << "-" << std::fixed << std::setprecision(2) << item.first.getBalance(); // updated Client Data
 			lines[item.second] = s.str();
 		}
+
+		// We have updated the old file copy, time to overwrite it on disk
 
 
 		ofstream info_file2(filesStruct.clientDB,  ios::trunc);
@@ -296,12 +298,63 @@ namespace utils {
 		for (size_t i = 0; i < lines.size(); i++)
 		{
 			info_file2 << lines[i];
+			info_file2 << "\n";
+		}
+		info_file2.close();
+	}
+	
 
-				info_file2 << '\n';
+
+	// Passed employee is already updated
+	void FileHelper::updateEmployee(vector<pair<Employee, int>>& eVec) {
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+
+		// opens the info DB in append mode to add a employee at the end
+		ifstream info_file(filesStruct.employeeDB, ios::in);
+
+		// do nothing if the file can't be opened
+		if (!info_file) return;
+
+		vector<string> lines;		//  used to rebuild the full file  (Old File Copy --> To Be Modified)
+		string line;
+		int counter = 0;
+		while (getline(info_file,line))
+		{
+			lines.push_back(line);
+			for (auto& item : eVec) {
+				if (Parser::split(line)[0] == to_string(item.first.getID()))
+				{
+					item.second = counter;
+				}
+			}
+			counter++;
+		}
+
+		info_file.close();
+		stringstream s;
+
+		for (auto& item : eVec) {
+			s.str("");		// String stream must be cleared on every loop cycle
+			s << item.first.getID() << "-" << item.first.getName() << "-" << item.first.getPassword() << "-" << item.first.getRole() << "-" << std::fixed << std::setprecision(2) << item.first.getSalary(); // updated Employee Data
+			lines[item.second] = s.str();
+		}
+
+		// We have updated the old file copy, time to overwrite it on disk
+
+
+		ofstream info_file2(filesStruct.employeeDB,  ios::trunc);
+		if (!info_file2)
+			return;
+
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			info_file2 << lines[i];
+			info_file2 << "\n";
 		}
 
 		info_file2.close();
-
 	}
 	
 
