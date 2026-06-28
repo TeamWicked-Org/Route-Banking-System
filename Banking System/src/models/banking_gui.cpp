@@ -60,6 +60,7 @@ namespace bank_state {
     static Role        current_role = Role::None;
     static std::string current_username;
     static std::string current_position;
+    static int         current_id;
 
     static bool is_logged_in() { return current_role != Role::None; }
 
@@ -71,6 +72,7 @@ namespace bank_state {
     // Row selection
     static int selected_client = -1;
     static int selected_employee = -1;
+    static int selected_admin = -1;
 
     // Modal open flags (set true → OpenPopup on the same frame)
     static bool open_add_client = false;
@@ -84,6 +86,8 @@ namespace bank_state {
     static bool open_add_employee = false;
     static bool open_set_salary = false;
     static bool open_add_admin = false;
+    static bool open_edit_admin = false;
+    static bool open_remove_admin = false;
 
     // Sidebar toast
     static char  status_msg[256] = {};
@@ -103,6 +107,8 @@ namespace bank_state {
         current_view = View::Clients;
         selected_client = -1;
         selected_employee = -1;
+        selected_admin = -1;
+        current_id = -1;
     }
 }
 
@@ -146,6 +152,7 @@ static bool try_login(const char* name_in, const char* pass_in)
             bank_state::current_username = name_in;
             bank_state::current_position = "Administrator";
             bank_state::current_view = bank_state::View::Clients;
+            bank_state::current_id = a.getID();
             return true;
         }
     }
@@ -155,6 +162,7 @@ static bool try_login(const char* name_in, const char* pass_in)
             bank_state::current_username = name_in;
             bank_state::current_position = e.getRole();
             bank_state::current_view = bank_state::View::Clients;
+            bank_state::current_id = e.getID();
             return true;
         }
     }
@@ -343,6 +351,7 @@ static void draw_login_screen(const ImVec2& display)
                 bank_state::current_username = n;
                 bank_state::current_position = "Administrator";
                 bank_state::current_view = bank_state::View::Clients;
+                bank_state::current_id = bank_state::admins.back().getID();
 
                 memset(sname, 0, sizeof sname);
                 memset(spass, 0, sizeof spass);
@@ -569,7 +578,7 @@ static void modal_remove_all_client()
     ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x / 2) - 100.f);
     if (btn_red("Confirm", { 100.f,0.f })) {
         clients.clear();
-        utils::FileHelper::clearInfoFile(utils::FileHelper::get_DB_Struct().clientDB);
+        utils::FileHelper::removeAllClients();
         ImGui::CloseCurrentPopup();
         set_status("All Clients removed.");
     }
@@ -1069,7 +1078,10 @@ static void modal_confirm_client_deletion(int clientIdx)
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.f);
     if (btn_red("Confirm", { 100.f,0.f })) {
-        clients.erase(clients.begin() + clientIdx);
+        vector<pair<Client, int>> clientPlaceholder;
+        clientPlaceholder.push_back({ clients[clientIdx],0 });
+        utils::FileHelper::removeClient(clientPlaceholder);
+        clients.erase(clients.begin() + clientIdx);    // Memory removal
         if (selected_client >= (int)clients.size()) selected_client = (int)clients.size() - 1;
         clientIdx = -1;
         ImGui::CloseCurrentPopup();
@@ -1123,6 +1135,9 @@ static void modal_confirm_employee_deletion(int employeeIdx)
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.f);
     if (btn_red("Confirm", { 100.f,0.f })) {
+        vector<pair<Employee, int>> employeePlaceholder;
+        employeePlaceholder.push_back({ employees[employeeIdx],0 });
+        utils::FileHelper::removeEmployee(employeePlaceholder);
         employees.erase(employees.begin() + employeeIdx);
         if (selected_employee >= (int)employees.size()) selected_employee = (int)employees.size() - 1;
         employeeIdx = -1;
@@ -1322,48 +1337,73 @@ static void view_admin(float w, float /*h*/)
     ImGui::BeginChild("##admin_tbl", { w,170.f }, true);
     if (ImGui::BeginTable("tbl_admins", 2,
         ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter |
-        ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingStretchProp))
+        ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_Resizable |
+        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingStretchProp))
     {
         ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 60.f);
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
-        for (auto& a : admins) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%d", a.getID());
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", a.getName().c_str());
+
+
+        for (int i = 0; i < (int)admins.size(); ++i) {
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, 26.f);
+            ImGui::TableSetColumnIndex(0);
+            char lbl[24]; snprintf(lbl, sizeof lbl, "%d##as%d", admins[i].getID(), i);
+            if (ImGui::Selectable(lbl, selected_admin == i ,
+                ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, { 0,24.f }))
+                    selected_admin = i;
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", admins[i].getName().c_str());
+            ImGui::PushStyleColor(ImGuiCol_Text, { 0.30f,0.85f,0.50f,1.f });
+            ImGui::PopStyleColor();
         }
+
+
+        //for (auto& a : admins) {
+        //    ImGui::TableNextRow();
+        //    ImGui::TableSetColumnIndex(0); ImGui::Text("%d", a.getID());
+        //    ImGui::TableSetColumnIndex(1); ImGui::Text("%s", a.getName().c_str());
+        //}
         ImGui::EndTable();
     }
     ImGui::EndChild(); ImGui::PopStyleColor();
 
     ImGui::Spacing();
     if (btn_green("+ Add Administrator", { 170.f,32.f })) open_add_admin = true;
-
-    ImGui::Spacing(); ImGui::Spacing();
-    ImGui::PushStyleColor(ImGuiCol_Text, { 0.65f,0.78f,1.f,1.f });
-    ImGui::SetWindowFontScale(1.05f); ImGui::Text("Employee Roster");
-    ImGui::SetWindowFontScale(1.f); ImGui::PopStyleColor();
-    ImGui::Separator(); ImGui::Spacing();
-
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.06f,0.07f,0.11f,1.f });
-    ImGui::BeginChild("##emp_ro", { w,160.f }, true);
-    if (ImGui::BeginTable("tbl_emp_ro", 3,
-        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter |
-        ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingStretchProp))
-    {
-        ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 52.f);
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 1.f);
-        ImGui::TableSetupColumn("Role", ImGuiTableColumnFlags_WidthStretch, 0.6f);
-        ImGui::TableHeadersRow();
-        for (auto& e : employees) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%d", e.getID());
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", e.getName().c_str());
-            ImGui::TableSetColumnIndex(2); ImGui::TextDisabled("%s", e.getRole().c_str());
-        }
-        ImGui::EndTable();
+    if (selected_admin >= 0 && selected_admin < (int)admins.size()) {
+        ImGui::SameLine();
+        if (btn_amber("Edit Admin", { 115.f,32.f })) open_edit_admin = true;
+        ImGui::SameLine();
+        if (admins[selected_admin].getID() != current_id) if(btn_red("Remove Admin", { 90.f,32.f }))  open_remove_admin = true;
+        
     }
-    ImGui::EndChild(); ImGui::PopStyleColor();
+    ImGui::Spacing(); ImGui::Spacing();
+
+    // Employee Roster Removed for reduduncy
+    // =====================================
+    //ImGui::PushStyleColor(ImGuiCol_Text, { 0.65f,0.78f,1.f,1.f });
+    //ImGui::SetWindowFontScale(1.05f); ImGui::Text("Employee Roster");
+    //ImGui::SetWindowFontScale(1.f); ImGui::PopStyleColor();
+    //ImGui::Separator(); ImGui::Spacing();
+
+    //ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.06f,0.07f,0.11f,1.f });
+    //ImGui::BeginChild("##emp_ro", { w,160.f }, true);
+    //if (ImGui::BeginTable("tbl_emp_ro", 3,
+    //    ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter |
+    //    ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingStretchProp))
+    //{
+    //    ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 52.f);
+    //    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 1.f);
+    //    ImGui::TableSetupColumn("Role", ImGuiTableColumnFlags_WidthStretch, 0.6f);
+    //    ImGui::TableHeadersRow();
+    //    for (auto& e : employees) {
+    //        ImGui::TableNextRow();
+    //        ImGui::TableSetColumnIndex(0); ImGui::Text("%d", e.getID());
+    //        ImGui::TableSetColumnIndex(1); ImGui::Text("%s", e.getName().c_str());
+    //        ImGui::TableSetColumnIndex(2); ImGui::TextDisabled("%s", e.getRole().c_str());
+    //    }
+    //    ImGui::EndTable();
+    //}
+    //ImGui::EndChild(); ImGui::PopStyleColor();
 
     modal_add_admin();
 }
@@ -1547,6 +1587,10 @@ void banking_gui::tick(ID3D11ShaderResourceView* bgImg = nullptr, int img_width 
         bank_state::current_role == bank_state::Role::Admin ? ImVec4(0.9608f, 0.3059f, 0.3059f, 1.0f) :
         ImVec4(0.5294f, 0.9137f, 0.3569f, 1.0f), "%s", bank_state::current_position.c_str());
 
+    ImGui::SetCursorPosX(24.f);
+    ImGui::TextDisabled("User ID: ");
+    ImGui::SameLine(0.f, 2.f);
+    ImGui::TextColored( ImVec4(0.8157f, 0.502f, 0.9255f, 1.0f), "%d", bank_state::current_id);
     ImGui::SetCursorPosX(14.f);
     ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 

@@ -171,6 +171,17 @@ namespace utils {
 
 		static void updateEmployee(vector<pair<Employee,int>>& eVec);
 
+		static void updateAdmin(vector<pair<Admin,int>>& aVec);
+
+		static void removeAllClients();
+		static void removeAllEmployees();
+		static void removeAllAdmins();
+
+		static void removeClient(vector<pair<Client,int>> cVec);
+		static void removeEmployee(vector<pair<Employee, int>> eVec);
+		static void removeAdmin(vector<pair<Admin, int>> aVec);
+
+
 		static void fetchClients();
 		static void fetchEmployees();
 		static void fetchAdmins();

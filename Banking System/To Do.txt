@@ -27,7 +27,7 @@ FileManager Class:
 
 7- removeEmployee()			---> available for admin account role				||
 																				|| --> Renad Tasks
-7- removeClient()			---> available for employee account role			|| 
+7- removeClient()			---> available for employee account role			||
 
 
 employee class:

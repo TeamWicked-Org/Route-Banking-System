@@ -252,24 +252,44 @@ namespace utils {
 	}
 
 
+	// Setup to update a file
+	// ======================
+	// 1- Get file name
+	// 2- Open file for reading --> check if it opened successfully
+	// 3- Read the full file content and save it line by line to a temporary vector<string>
+	// 4- While reading, check if the current line is out target data line then save it's position
+	// 5- Start building the new string using string stream to modify the line it the position we got on step 4
+	// 6- Modify the line(s) then close the file
+	// 7- Re-open the file in trunc mode using ofstream to erase it's old content
+	// 8- Start re-writing the file then close it.
+	// =========================================================================================================
+
+
 	// Passed client is already updated
 	void FileHelper::updateClient(vector<pair<Client, int>>& cVec) {
+		// Step 1
+		// ======
 		// get's database info from the file helper
 		databaseFileNames filesStruct = get_DB_Struct();
 
+		// Step 2
+		// ======
 		// opens the info DB in append mode to add a employee at the end
 		ifstream info_file(filesStruct.clientDB, ios::in);
 
 		// do nothing if the file can't be opened
 		if (!info_file) return;
 
+		// Step 3-4
+		// ========
+		// This is an old copy of the file to be modified
 		vector<string> lines;		//  used to rebuild the full file  (Old File Copy --> To Be Modified)
 		string line;
-		int counter = 0;
-		while (getline(info_file,line))
+		int counter = 0;			// Line Location in file
+		while (getline(info_file,line))  
 		{
 			lines.push_back(line);
-			for (auto& item : cVec) {
+			for (auto& item : cVec) {		
 				if (Parser::split(line)[0] == to_string(item.first.getID()))
 				{
 					item.second = counter;
@@ -279,18 +299,24 @@ namespace utils {
 		}
 
 		info_file.close();
+		// Step 5-6
+		// ========
 		stringstream s;
 
 		for (auto& item : cVec) {
 			s.str("");		// String stream must be cleared on every loop cycle
-			s << item.first.getID() << "-" << item.first.getName() << "-" << item.first.getPassword() << "-" << std::fixed << std::setprecision(2) << item.first.getBalance(); // updated Client Data
+			s << item.first.getID() << utils::formattingDelimiter << item.first.getName() << utils::formattingDelimiter << item.first.getPassword() << utils::formattingDelimiter << std::fixed << std::setprecision(2) << item.first.getBalance(); // updated Client Data
 			lines[item.second] = s.str();
 		}
+
+		// From here vector<string> lines <--- this now holds the updated copy of the file
 
 		// We have updated the old file copy, time to overwrite it on disk
 
 
-		ofstream info_file2(filesStruct.clientDB,  ios::trunc);
+		// Step 7
+		// ======
+		ofstream info_file2(filesStruct.clientDB, ios::trunc);
 		if (!info_file2)
 			return;
 
@@ -300,10 +326,13 @@ namespace utils {
 			info_file2 << lines[i];
 			info_file2 << "\n";
 		}
+
+		// Step 8 - Finalization
+		// =====================
 		info_file2.close();
 	}
-	
 
+	
 
 	// Passed employee is already updated
 	void FileHelper::updateEmployee(vector<pair<Employee, int>>& eVec) {
@@ -336,7 +365,7 @@ namespace utils {
 
 		for (auto& item : eVec) {
 			s.str("");		// String stream must be cleared on every loop cycle
-			s << item.first.getID() << "-" << item.first.getName() << "-" << item.first.getPassword() << "-" << item.first.getRole() << "-" << std::fixed << std::setprecision(2) << item.first.getSalary(); // updated Employee Data
+			s << item.first.getID() << utils::formattingDelimiter << item.first.getName() << utils::formattingDelimiter << item.first.getPassword() << utils::formattingDelimiter << item.first.getRole() << utils::formattingDelimiter << std::fixed << std::setprecision(2) << item.first.getSalary(); // updated Employee Data
 			lines[item.second] = s.str();
 		}
 
@@ -354,6 +383,262 @@ namespace utils {
 			info_file2 << "\n";
 		}
 
+		info_file2.close();
+	}
+	
+
+	// Passed employee is already updated
+	void FileHelper::updateAdmin(vector<pair<Admin, int>>& aVec) {
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+
+		// opens the info DB in append mode to add a admin at the end
+		ifstream info_file(filesStruct.adminDB, ios::in);
+
+		// do nothing if the file can't be opened
+		if (!info_file) return;
+
+		vector<string> lines;		//  used to rebuild the full file  (Old File Copy --> To Be Modified)
+		string line;
+		int counter = 0;
+		while (getline(info_file,line))
+		{
+			lines.push_back(line);
+			for (auto& item : aVec) {
+				if (Parser::split(line)[0] == to_string(item.first.getID()))
+				{
+					item.second = counter;
+				}
+			}
+			counter++;
+		}
+
+		info_file.close();
+		stringstream s;
+
+		for (auto& item : aVec) {
+			s.str("");		// String stream must be cleared on every loop cycle
+			s << item.first.getID() << utils::formattingDelimiter << item.first.getName() << utils::formattingDelimiter << item.first.getPassword() << utils::formattingDelimiter << item.first.getRole() << utils::formattingDelimiter << std::fixed << std::setprecision(2) << item.first.getSalary(); // updated Admin Data
+			lines[item.second] = s.str();
+		}
+
+		// We have updated the old file copy, time to overwrite it on disk
+
+
+		ofstream info_file2(filesStruct.adminDB,  ios::trunc);
+		if (!info_file2)
+			return;
+
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			info_file2 << lines[i];
+			info_file2 << "\n";
+		}
+
+		info_file2.close();
+	}
+
+	// Setup to remove user from DB
+	// ============================
+	// 1- Get file name
+	// 2- Open file for reading --> check if it opened successfully
+	// 3- Read the full file content and save it line by line to a temporary vector<string>
+	// 4- While reading, check if the current line is out target data line then save it's position
+	// 5- Removed the targets from the file copy holder (vector <string> lines)
+	// 6- Re-open the file in trunc mode using ofstream to erase it's old content
+	// 7- Start re-writing the file then close it.
+	// =========================================================================================================
+
+	
+	void FileHelper::removeClient(vector<pair<Client, int>> cVec) {
+		// Step 1
+		// =======
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+
+		// Step 2
+		// =======
+		// opens the info DB in append mode to add a employee at the end
+		ifstream info_file(filesStruct.clientDB, ios::in);
+
+		// do nothing if the file can't be opened
+		if (!info_file) return;
+		
+		// Step 3-4
+		// ========
+		// This is an old copy of the file to be modified
+		vector<string> lines;		//  used to rebuild the full file  (Old File Copy --> To Be Modified)
+		string line;
+		int counter = 0;			// Line Location in file
+		while (getline(info_file, line))
+		{
+			lines.push_back(line);
+			for (auto& item : cVec) {
+				if (Parser::split(line)[0] == to_string(item.first.getID()))
+				{
+					item.second = counter;
+				}
+			}
+			counter++;
+		}
+
+
+		info_file.close();
+		// Step 5
+		// ========
+
+		for (auto& item : cVec) {
+			lines.erase(lines.begin() + item.second);
+		}
+
+		// From here vector<string> lines <--- this now holds the updated copy of the file
+
+		// We have updated the old file copy, time to overwrite it on disk
+
+
+		// Step 7
+		// =======
+		ofstream info_file2(filesStruct.clientDB, ios::trunc);
+		if (!info_file2)
+			return;
+
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			info_file2 << lines[i];
+			info_file2 << "\n";
+		}
+
+		// Step 8 - Finalization
+		// =====================
+		info_file2.close();
+	}
+	void FileHelper::removeEmployee(vector<pair<Employee, int>> eVec) {
+		// Step 1
+		// ======
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+
+		// Step 2
+		// ======
+		// opens the info DB in append mode to add a employee at the end
+		ifstream info_file(filesStruct.employeeDB, ios::in);
+
+		// do nothing if the file can't be opened
+		if (!info_file) return;
+
+		// Step 3-4
+		// ========
+		// This is an old copy of the file to be modified
+		vector<string> lines;		//  used to rebuild the full file  (Old File Copy --> To Be Modified)
+		string line;
+		int counter = 0;			// Line Location in file
+		while (getline(info_file, line))
+		{
+			lines.push_back(line);
+			for (auto& item : eVec) {
+				if (Parser::split(line)[0] == to_string(item.first.getID()))
+				{
+					item.second = counter;
+				}
+			}
+			counter++;
+		}
+
+
+		info_file.close();
+		// Step 5
+		// ======
+
+		for (auto& item : eVec) {
+			lines.erase(lines.begin() + item.second);
+		}
+
+		// From here vector<string> lines <--- this now holds the updated copy of the file
+
+		// We have updated the old file copy, time to overwrite it on disk
+
+
+		// Step 7
+		// ======
+		ofstream info_file2(filesStruct.employeeDB, ios::trunc);
+		if (!info_file2)
+			return;
+
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			info_file2 << lines[i];
+			info_file2 << "\n";
+		}
+
+		// Step 8 - Finalization
+		// =====================
+		info_file2.close();
+	}
+
+	void FileHelper::removeAdmin(vector<pair<Admin, int>> aVec) {
+		// Step 1
+		// ======
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+
+		// Step 2
+		// ======
+		// opens the info DB in append mode to add a employee at the end
+		ifstream info_file(filesStruct.adminDB, ios::in);
+
+		// do nothing if the file can't be opened
+		if (!info_file) return;
+
+		// Step 3-4
+		// ========
+		// This is an old copy of the file to be modified
+		vector<string> lines;		//  used to rebuild the full file  (Old File Copy --> To Be Modified)
+		string line;
+		int counter = 0;			// Line Location in file
+		while (getline(info_file, line))
+		{
+			lines.push_back(line);
+			for (auto& item : aVec) {
+				if (Parser::split(line)[0] == to_string(item.first.getID()))
+				{
+					item.second = counter;
+				}
+			}
+			counter++;
+		}
+
+
+		info_file.close();
+		// Step 5
+		// ======
+
+		for (auto& item : aVec) {
+			lines.erase(lines.begin() + item.second);
+		}
+
+		// From here vector<string> lines <--- this now holds the updated copy of the file
+
+		// We have updated the old file copy, time to overwrite it on disk
+
+
+		// Step 7
+		// =======
+		ofstream info_file2(filesStruct.adminDB, ios::trunc);
+		if (!info_file2)
+			return;
+
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			info_file2 << lines[i];
+			info_file2 << "\n";
+		}
+
+		// Step 8 - Finalization
+		// =====================
 		info_file2.close();
 	}
 	
@@ -455,12 +740,32 @@ namespace utils {
 		info_file.close();
 
 	}
+
 	void FileHelper::clearInfoFile(std::string filename) {	// Clears specific file sent as parameter
 		ofstream file_to_clear(filename, ios::trunc);
 		file_to_clear.close();
 	}
+
 	void FileHelper::clearIDFile(std::string filename) {	// Clears specific file sent as parameter
 		FileHelper::saveLast(filename, -1);
+	}
+
+	void FileHelper::removeAllClients() {
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+		FileHelper::clearInfoFile(filesStruct.clientDB);
+	}
+
+	void FileHelper::removeAllEmployees() {
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+		FileHelper::clearInfoFile(filesStruct.employeeDB);
+	}
+
+	void FileHelper::removeAllAdmins() {
+		// get's database info from the file helper
+		databaseFileNames filesStruct = get_DB_Struct();
+		FileHelper::clearInfoFile(filesStruct.adminDB);
 	}
 
 
