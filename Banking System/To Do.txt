@@ -1,33 +1,8 @@
-
-
-
-
-
-
-1- Removing specific client, employee or admin don't yet remove it from the database
 2- Updating user data don't yet update it in database
 3- add updating functions for all 3 user types and integrate it into GUI
 4- Client* searchClient(int id) --> do it in GUI, add a search bar that search by ID or name then filter the table to show only the matched regex
 
-FileManager Class:
-==================
-4- UpdateClient()			---> available for employee and admin account roles			||
-5- UpdateEmployee()			---> available for admin account role						|| --> Rahma Tasks --> Database Updating
-6- UpdteAdmin()				---> available for admin account role						||
 
-===========================================================================================================================================================================================================
-7- removeAllAdmins()		---> available for admin account role --> on deletion prevent the deletion of the current logged in admin																	 ||
-7- removeAdmin()			---> available for admin account role --> in GUI admin selection table prevent selecting the currently logged in admin or just don't show the remove button if it's selected ||
-===========================================================================================================================================================================================================
-																		|||||
-																		 |||
-																		  |
-																		  V
-																		Habiba
-
-7- removeEmployee()			---> available for admin account role				||
-																				|| --> Renad Tasks
-7- removeClient()			---> available for employee account role			||
 
 
 employee class:

@@ -178,6 +178,34 @@ static std::string fmt_money(double v) {
     return ss.str();
 }
 
+// Case-insensitive substring match against name, plus literal substring
+// match against ID and (optionally) a numeric amount (balance/salary).
+static bool matches_search(const char* search, int id, const std::string& name,
+    double amount = 0.0, bool has_amount = false)
+{
+    if (!search || !search[0]) return true;
+
+    std::string needle(search);
+    std::transform(needle.begin(), needle.end(), needle.begin(), ::tolower);
+
+    std::string lname(name);
+    std::transform(lname.begin(), lname.end(), lname.begin(), ::tolower);
+    if (lname.find(needle) != std::string::npos) return true;
+
+    std::string id_str = std::to_string(id);
+    if (id_str.find(needle) != std::string::npos) return true;
+
+    //if (has_amount) {
+    //    std::ostringstream ss;
+    //    ss << std::fixed << std::setprecision(2) << amount;
+    //    if (ss.str().find(needle) != std::string::npos) return true;
+
+    //    std::string amt_int = std::to_string((long long)amount);
+    //    if (amt_int.find(needle) != std::string::npos) return true;
+    //}
+    return false;
+}
+
 static bool btn_green(const char* lbl, ImVec2 sz = { 0,0 }) {
     ImGui::PushStyleColor(ImGuiCol_Button, { 0.09f,0.47f,0.19f,1.f });
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.13f,0.61f,0.26f,1.f });
@@ -1177,8 +1205,19 @@ static void view_clients(float w, float h)
         "Total on Deposit:", fmt_money(total_bal).c_str(), { 0.30f,0.85f,0.50f,1.f }, w);
     ImGui::Spacing();
 
+    // ── Search bar ───────────────────────────────────────────
+    static char client_search[64] = {};
+    ImGui::SetNextItemWidth(280.f);
+    ImGui::InputTextWithHint("##client_search", "Search by ID or name...",
+        client_search, sizeof client_search);
+    if (client_search[0]) {
+        ImGui::SameLine();
+        if (ImGui::Button("Clear##cs")) client_search[0] = '\0';
+    }
+    ImGui::Spacing();
+
     static int delete_idx = -1;
-    float table_h = h - 168.f;
+    float table_h = h - 168.f - 36.f;   // shrink table a bit to make room for the bar
     float row_h = 35.f;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.06f,0.07f,0.11f,1.f });
@@ -1196,6 +1235,10 @@ static void view_clients(float w, float h)
         ImGui::TableHeadersRow();
 
         for (int i = 0; i < (int)clients.size(); ++i) {
+            if (!matches_search(client_search, clients[i].getID(), clients[i].getName(),
+                clients[i].getBalance(), true))
+                continue;
+
             ImGui::TableNextRow(ImGuiTableRowFlags_None, row_h);
             bool sel = (selected_client == i);
             ImGui::TableSetColumnIndex(0);
@@ -1247,7 +1290,18 @@ static void view_employees(float w, float h)
         "Monthly Payroll:", fmt_money(total_payroll).c_str(), { 1.f,0.76f,0.30f,1.f }, w);
     ImGui::Spacing();
 
-    float table_h = h - 168.f;
+    // ── Search bar ───────────────────────────────────────────
+    static char employee_search[64] = {};
+    ImGui::SetNextItemWidth(280.f);
+    ImGui::InputTextWithHint("##employee_search", "Search by ID or name...",
+        employee_search, sizeof employee_search);
+    if (employee_search[0]) {
+        ImGui::SameLine();
+        if (ImGui::Button("Clear##es")) employee_search[0] = '\0';
+    }
+    ImGui::Spacing();
+
+    float table_h = h - 168.f - 36.f;
     ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.06f,0.07f,0.11f,1.f });
     ImGui::BeginChild("##et", { w,table_h }, true);
     if (ImGui::BeginTable("tbl_employees", 4,
@@ -1262,6 +1316,10 @@ static void view_employees(float w, float h)
         ImGui::TableSetupColumn("Salary", ImGuiTableColumnFlags_WidthFixed, 120.f);
         ImGui::TableHeadersRow();
         for (int i = 0; i < (int)employees.size(); ++i) {
+            if (!matches_search(employee_search, employees[i].getID(), employees[i].getName(),
+                employees[i].getSalary(), true))
+                continue;
+
             ImGui::TableNextRow(ImGuiTableRowFlags_None, 26.f);
             ImGui::TableSetColumnIndex(0);
             char lbl[24]; snprintf(lbl, sizeof lbl, "%d##es%d", employees[i].getID(), i);
@@ -1292,6 +1350,7 @@ static void view_employees(float w, float h)
     if (btn_red("Remove All Employees", { 170.f,32.f })) open_remove_all_employee = true;
     modal_add_employee(); modal_set_salary(); modal_confirm_employee_deletion(selected_employee); modal_remove_all_employee();
 }
+
 
 // ── Administration Dashboard ──────────────────────────────────────────────────
 static void view_admin(float w, float /*h*/)
@@ -1333,6 +1392,17 @@ static void view_admin(float w, float /*h*/)
     ImGui::SetWindowFontScale(1.f); ImGui::PopStyleColor();
     ImGui::Separator(); ImGui::Spacing();
 
+    // ── Search bar ───────────────────────────────────────────
+    static char admin_search[64] = {};
+    ImGui::SetNextItemWidth(280.f);
+    ImGui::InputTextWithHint("##admin_search", "Search by ID or name...",
+        admin_search, sizeof admin_search);
+    if (admin_search[0]) {
+        ImGui::SameLine();
+        if (ImGui::Button("Clear##ads")) admin_search[0] = '\0';
+    }
+    ImGui::Spacing();
+
     ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.06f,0.07f,0.11f,1.f });
     ImGui::BeginChild("##admin_tbl", { w,170.f }, true);
     if (ImGui::BeginTable("tbl_admins", 2,
@@ -1346,6 +1416,8 @@ static void view_admin(float w, float /*h*/)
 
 
         for (int i = 0; i < (int)admins.size(); ++i) {
+            if (!matches_search(admin_search, admins[i].getID(), admins[i].getName()))
+                continue;
             ImGui::TableNextRow(ImGuiTableRowFlags_None, 26.f);
             ImGui::TableSetColumnIndex(0);
             char lbl[24]; snprintf(lbl, sizeof lbl, "%d##as%d", admins[i].getID(), i);
@@ -1373,7 +1445,7 @@ static void view_admin(float w, float /*h*/)
         ImGui::SameLine();
         if (btn_amber("Edit Admin", { 115.f,32.f })) open_edit_admin = true;
         ImGui::SameLine();
-        if (admins[selected_admin].getID() != current_id) if(btn_red("Remove Admin", { 90.f,32.f }))  open_remove_admin = true;
+        if (admins[selected_admin].getID() != current_id) if(btn_red("Remove Admin", { 110.f,32.f }))  open_remove_admin = true;
         
     }
     ImGui::Spacing(); ImGui::Spacing();
