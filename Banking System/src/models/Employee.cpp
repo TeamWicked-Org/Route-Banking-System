@@ -65,7 +65,7 @@ double Employee::getSalary() const {
 	return salary;
 }
 
-string Employee::getRole() const {
+string Employee::getPosition() const {
 	return position;
 }
 
@@ -80,6 +80,10 @@ void Employee::display() const {
 	cout << "Salary: " << salary << endl;
 }
 
+
+void Employee::editClient(Client c) {
+
+}
 
 void Employee::decreaseStaticID() {
 	Employee::id -= 1;

@@ -218,7 +218,7 @@ namespace utils {
 		info_file << e.getID() << utils::formattingDelimiter
 			<< e.getName() << utils::formattingDelimiter
 			<< e.getPassword() << utils::formattingDelimiter
-			<< e.getRole() << utils::formattingDelimiter
+			<< e.getPosition() << utils::formattingDelimiter
 			<< std::fixed << std::setprecision(2) << e.getSalary() << '\n';
 
 	}
@@ -246,12 +246,12 @@ namespace utils {
 		info_file << a.getID() << utils::formattingDelimiter
 			<< a.getName() << utils::formattingDelimiter
 			<< a.getPassword() << utils::formattingDelimiter
-			<< a.getRole() << utils::formattingDelimiter
+			<< a.getPosition() << utils::formattingDelimiter
 			<< std::fixed << std::setprecision(2) << a.getSalary() << '\n';
 
 	}
 
-
+	
 	// Setup to update a file
 	// ======================
 	// 1- Get file name
@@ -365,7 +365,7 @@ namespace utils {
 
 		for (auto& item : eVec) {
 			s.str("");		// String stream must be cleared on every loop cycle
-			s << item.first.getID() << utils::formattingDelimiter << item.first.getName() << utils::formattingDelimiter << item.first.getPassword() << utils::formattingDelimiter << item.first.getRole() << utils::formattingDelimiter << std::fixed << std::setprecision(2) << item.first.getSalary(); // updated Employee Data
+			s << item.first.getID() << utils::formattingDelimiter << item.first.getName() << utils::formattingDelimiter << item.first.getPassword() << utils::formattingDelimiter << item.first.getPosition() << utils::formattingDelimiter << std::fixed << std::setprecision(2) << item.first.getSalary(); // updated Employee Data
 			lines[item.second] = s.str();
 		}
 
@@ -418,7 +418,7 @@ namespace utils {
 
 		for (auto& item : aVec) {
 			s.str("");		// String stream must be cleared on every loop cycle
-			s << item.first.getID() << utils::formattingDelimiter << item.first.getName() << utils::formattingDelimiter << item.first.getPassword() << utils::formattingDelimiter << item.first.getRole() << utils::formattingDelimiter << std::fixed << std::setprecision(2) << item.first.getSalary(); // updated Admin Data
+			s << item.first.getID() << utils::formattingDelimiter << item.first.getName() << utils::formattingDelimiter << item.first.getPassword() << utils::formattingDelimiter << item.first.getPosition() << utils::formattingDelimiter << std::fixed << std::setprecision(2) << item.first.getSalary(); // updated Admin Data
 			lines[item.second] = s.str();
 		}
 

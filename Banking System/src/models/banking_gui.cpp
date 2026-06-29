@@ -77,14 +77,16 @@ namespace bank_state {
     // Modal open flags (set true → OpenPopup on the same frame)
     static bool open_add_client = false;
     static bool open_delete_client = false;
+    static bool open_edit_client = false;
     static bool open_remove_all_clients = false;
     static bool open_delete_employee = false;
     static bool open_remove_all_employee = false;
+    static bool open_remove_all_admin = false;
     static bool open_deposit = false;
     static bool open_withdraw = false;
     static bool open_transfer = false;
     static bool open_add_employee = false;
-    static bool open_set_salary = false;
+    static bool open_edit_employee = false;
     static bool open_add_admin = false;
     static bool open_edit_admin = false;
     static bool open_remove_admin = false;
@@ -160,7 +162,7 @@ static bool try_login(const char* name_in, const char* pass_in)
         if (e.getName() == name_in && e.getPassword() == pw_hash) {
             bank_state::current_role = bank_state::Role::Employee;
             bank_state::current_username = name_in;
-            bank_state::current_position = e.getRole();
+            bank_state::current_position = e.getPosition();
             bank_state::current_view = bank_state::View::Clients;
             bank_state::current_id = e.getID();
             return true;
@@ -250,7 +252,9 @@ static void stats_bar(const char* la, const char* va, ImVec4 ca,
     ImGui::PopStyleColor();
 }
 
-ImFont* customFontSize;
+ImFont* customFontSize_01;
+ImFont* customFontSize_02;
+ImFont* customFontSize_03;
 
 // =============================================================================
 // Login Screen
@@ -316,7 +320,7 @@ static void draw_login_screen(const ImVec2& display)
         ImGui::PushStyleColor(ImGuiCol_FrameBg, { 0.4392f, 0.4471f, 0.4549f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_Text, { 0.0f, 0.0f, 0.0f, 1.0f });
         ImGui::PushStyleColor(ImGuiCol_InputTextCursor, { 0.0f, 0.0f, 0.0f, 1.0f });
-        ImGui::PushFont(customFontSize);
+        ImGui::PushFont(customFontSize_01);
         ImGui::InputText("##su_name", sname, sizeof sname);
         ImGui::PopFont();
         ImGui::Spacing();
@@ -325,7 +329,7 @@ static void draw_login_screen(const ImVec2& display)
         ImGui::TextDisabled("Password");
         ImGui::SetCursorPosX(FX);
         ImGui::SetNextItemWidth(FW);
-        ImGui::PushFont(customFontSize);
+        ImGui::PushFont(customFontSize_01);
         ImGui::InputText("##su_pass", spass, sizeof spass, ImGuiInputTextFlags_Password);
         ImGui::PopFont();
         ImGui::Spacing();
@@ -334,7 +338,7 @@ static void draw_login_screen(const ImVec2& display)
         ImGui::TextDisabled("Confirm Password");
         ImGui::SetCursorPosX(FX);
         ImGui::SetNextItemWidth(FW);
-        ImGui::PushFont(customFontSize);
+        ImGui::PushFont(customFontSize_01);
         bool confirm_enter = ImGui::InputText("##su_confirm", sconfirm, sizeof sconfirm,
             ImGuiInputTextFlags_Password | ImGuiInputTextFlags_EnterReturnsTrue);
         ImGui::PopFont();
@@ -415,7 +419,7 @@ static void draw_login_screen(const ImVec2& display)
     ImGui::PushStyleColor(ImGuiCol_FrameBg, { 0.4392f, 0.4471f, 0.4549f, 1.0f });
     ImGui::PushStyleColor(ImGuiCol_Text, { 0.0f, 0.0f, 0.0f, 1.0f });
     ImGui::PushStyleColor(ImGuiCol_InputTextCursor, { 0.0f, 0.0f, 0.0f, 1.0f });
-    ImGui::PushFont(customFontSize);
+    ImGui::PushFont(customFontSize_01);
     bool user_enter = ImGui::InputText("##ln_u", uname, sizeof uname,
         ImGuiInputTextFlags_EnterReturnsTrue);
     // Enter in username box → jump focus to password
@@ -427,7 +431,7 @@ static void draw_login_screen(const ImVec2& display)
     ImGui::TextDisabled("Password");
     ImGui::SetCursorPosX(FX);
     ImGui::SetNextItemWidth(FW);
-    ImGui::PushFont(customFontSize);
+    ImGui::PushFont(customFontSize_01);
     bool pass_enter = ImGui::InputText("##ln_p", upass, sizeof upass,
         ImGuiInputTextFlags_Password |
         ImGuiInputTextFlags_EnterReturnsTrue);
@@ -476,12 +480,13 @@ static void draw_login_screen(const ImVec2& display)
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
-    //ImGui::SetCursorPosX(FX);
-    //ImGui::PushStyleColor(ImGuiCol_Text, { 0.42f,0.50f,0.64f,1.f });
-    //ImGui::TextWrapped("Demo  |  Admin: SuperAdmin / adminpass1");
-    //ImGui::SetCursorPosX(FX);
-    //ImGui::TextWrapped("            |  Staff: Emma Davis / emppass001");
-    //ImGui::PopStyleColor();
+    ImGui::SetCursorPosX(FX);
+    ImGui::PushFont(customFontSize_01);
+    ImGui::PushStyleColor(ImGuiCol_Text, { 0.42f,0.50f,0.64f,1.f });
+    ImGui::TextWrapped("Welcome to our simple, secure, and trusted banking system."
+        "\nSign in to access your accounts, manage your finances, and enjoy a seamless banking experience.");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
 
     ImGui::EndChild();
     ImGui::PopStyleColor();
@@ -527,6 +532,7 @@ static void modal_add_client()
     ImGui::SameLine(); ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
     ImGui::InputDouble("##c_bal", &init_bal, 500.0, 1000.0, "%.2f");
 
+    if (init_bal < 1.0) init_bal = 1.0;
 
     ImGui::Spacing();
     ImGui::PushStyleColor(ImGuiCol_Text, { 0.50f,0.56f,0.66f,1.f });
@@ -853,6 +859,7 @@ static void modal_add_employee()
     ImGui::SetNextItemWidth(210.f);
     ImGui::InputDouble("##e_sal", &salary, 500.0, 1000.0, "%.2f");
 
+    if (salary < 1.0) salary = 1.0;
 
     if (err[0]) {
         ImGui::Spacing();
@@ -947,13 +954,14 @@ static void modal_remove_all_employee()
 
 }
 
-// ── Set Salary ────────────────────────────────────────────────────────────────
-static void modal_set_salary()
+// ── Remove All Admin ────────────────────────────────────────────────────────────────
+static void modal_remove_all_admin()
 {
+    using namespace bank_state;
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 display = io.DisplaySize;
-    ImVec2 popup_size = ImVec2(380, 200);
+    ImVec2 popup_size = ImVec2(400, 180);
 
     ImGui::SetNextWindowPos(
         ImVec2(
@@ -962,44 +970,343 @@ static void modal_set_salary()
         ),
         ImGuiCond_Always
     );
-    if (bank_state::open_set_salary) { ImGui::SetNextWindowSize(popup_size); ImGui::OpenPopup("Update Salary"); bank_state::open_set_salary = false; }
-    if (!ImGui::BeginPopupModal("Update Salary", nullptr,
+    if (open_remove_all_admin) { ImGui::SetNextWindowSize(popup_size); ImGui::OpenPopup("Remove All Admins"); open_remove_all_admin = false; }
+    if (!ImGui::BeginPopupModal("Remove All Admins", nullptr,
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) return;
+    ImGui::Indent();
+    ImGui::Spacing();
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8549f, 0.3098f, 0.3098f, 1.0f));
+    ImGui::TextWrapped("This is a destructive operation, once confirmed all admin data will be cleared!");
+    ImGui::PopStyleColor();
+    ImGui::TextColored(ImVec4(0.1922f, 1.0f, 0.3176f, 1.0f),"(Logged-in admin is excluded)");
+    ImGui::Unindent();
+    ImGui::Spacing();
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.f);
+    ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x / 2) - 100.f);
+    if (btn_red("Confirm", { 100.f,0.f })) {
+        Admin loggedAdmin;
+        for (auto& admin : admins) {
+            if (admin.getID() == current_id) {
+                loggedAdmin = admin;
+                break;
+            }
+        }
+        admins.clear();
+        admins.push_back(loggedAdmin);
+        utils::FileHelper::clearInfoFile(utils::FileHelper::get_DB_Struct().adminDB);
+        utils::FileHelper::saveAdmin(loggedAdmin);
+        ImGui::CloseCurrentPopup();
+        set_status("All Admins removed.");
+    }
+    ImGui::SameLine();
+    if (btn_green("Cancel", { 100.f,0.f })) {
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::Unindent();
+    ImGui::Unindent();
+    ImGui::EndPopup();
+
+}
+
+
+// ── Edit Employee ────────────────────────────────────────────────────────────────
+static void modal_edit_employee()
+{
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 display = io.DisplaySize;
+    ImVec2 popup_size = ImVec2(420, 400);
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - popup_size.x) * 0.5f,
+            (io.DisplaySize.y - popup_size.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+    if (bank_state::open_edit_employee) { ImGui::SetNextWindowSize(popup_size); ImGui::OpenPopup("Edit Employee"); bank_state::open_edit_employee = false; }
+    if (!ImGui::BeginPopupModal("Edit Employee", nullptr,
         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) return;
 
-    static double new_sal = 5000.0; static char err[128] = {};
+    static char name_buf[64] = {}; static char pass_buf[64] = {}; static char pass_Conf[64] = {}; static char role_buf[48] = {};
+    static double new_sal = 5000.0; static char err[256] = {};
     int idx = bank_state::selected_employee;
     if (idx >= 0 && idx < (int)bank_state::employees.size()) {
         auto& e = bank_state::employees[idx];
         ImGui::Indent();
         ImGui::Text("Employee: %s", e.getName().c_str());
-        ImGui::Text("Current:  %s", fmt_money(e.getSalary()).c_str());
+        ImGui::Text("Position: %s", e.getPosition().c_str());
+        ImGui::Text("Salary:  %s", fmt_money(e.getSalary()).c_str());
         ImGui::Separator(); ImGui::Spacing();
 
-        ImGui::Text("New Salary:"); ImGui::SameLine(0.f, 15.f);
-        ImGui::Text("$"); ImGui::SameLine();
-        ImGui::SetNextItemWidth(170.f);
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.f); ImGui::SameLine();
-        ImGui::InputDouble("##ns", &new_sal, 500.0, 1000.0, "%.2f");
-
-        if (err[0]) { ImGui::Spacing(); ImGui::PushStyleColor(ImGuiCol_Text, { 1.f,0.4f,0.4f,1.f }); ImGui::Text("  %s", err); ImGui::PopStyleColor(); }
+        ImGui::PushFont(customFontSize_01);
+        ImGui::TextColored(ImVec4(0.6941f, 0.749f, 0.9922f, 1.0f), "Edit employee data: ");
+        ImGui::PopFont();
         ImGui::Spacing();
-        ImGui::Unindent();
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.f);
+        ImGui::Text("New Full Name:"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f); ImGui::InputText("##edit_e_name", name_buf, sizeof name_buf);
+        ImGui::Text("New Password:"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f); ImGui::InputText("##edit_e_pass", pass_buf, sizeof pass_buf, ImGuiInputTextFlags_Password);
+
+        ImGui::Text("Confirm Password"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f);
+        ImGui::PushFont(customFontSize_01);
+        bool confirm_enter = ImGui::InputText("##su_confirm", pass_Conf, sizeof pass_Conf,
+            ImGuiInputTextFlags_Password | ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::PopFont();
+        ImGui::Text("New Role:");     ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f); ImGui::InputText("##edit_e_role", role_buf, sizeof role_buf);
+        ImGui::Text("New Salary:"); ImGui::SameLine(160.f);
+        ImGui::SetNextItemWidth(170.f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.f);
+        ImGui::InputDouble("##ns", &new_sal, 500.0, 1000.0, "%.2f");
+        if (new_sal < 1.0) new_sal = 1.0;
+
+        if (err[0]) {
+            ImGui::Spacing();
+            ImGui::PushStyleColor(ImGuiCol_Text, { 1.f,0.4f,0.4f,1.f });
+            ImGui::TextWrapped("  %s", err);
+            ImGui::PopStyleColor();
+        }
+        else
+        {
+            ImGui::Spacing();
+            ImGui::TextWrapped("");
+        }
+
+        ImGui::Separator();
+
         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x / 4));
         if (btn_amber("Update", { 100.f,0.f })) {
-            if (!utils::Validation::validateSalary(new_sal)) strncpy_s(err, sizeof err, "Salary below minimum ($5000).", _TRUNCATE);
-            else { 
+            std::string n(name_buf), p(pass_buf), r(role_buf), c(pass_Conf);
+            if (!n.empty() && !utils::Validation::validateName(n))    strncpy_s(err, sizeof err, "Invalid name.", _TRUNCATE);
+            else if (!p.empty() && !utils::Validation::validatePassword(p)) strncpy_s(err, sizeof err, "Invalid password — 8-20 chars, no spaces.", _TRUNCATE);
+            //else if (!r.empty())                              strncpy_s(err, sizeof err, "Role cannot be empty.", _TRUNCATE);
+            else if (!utils::Validation::validateSalary(new_sal)) strncpy_s(err, sizeof err, "Salary below minimum ($5000).", _TRUNCATE);
+            else if (p != c)  strncpy_s(err, sizeof err, "Passwords do not match.", _TRUNCATE);
+            else if (isEmployeeUsernameExist(n)) {
+                strncpy_s(err, sizeof err, "Username exists, please try again.", _TRUNCATE);
+            }
+            else if (isAdminUsernameExist(n)) {
+                strncpy_s(err, sizeof err, "Username exists, please try again.", _TRUNCATE);
+            }
+            else
+            {
+
+                if (!n.empty())
+                    e.setName(n);
+
+                if (!p.empty())
+                    e.setPassword(p);
+
+                if (!r.empty())
+                    e.setPosition(r);
+
                 e.setSalary(new_sal);
-                vector<pair<Employee, int>> tmp;
-                tmp.push_back({ e, 0 });
-                utils::FileHelper::updateEmployee(tmp);
-                bank_state::set_status("Salary updated.");
+
+                vector<pair<Employee, int>> tmpEmp;
+                tmpEmp.push_back({e,0});
+                utils::FileHelper::updateEmployee(tmpEmp);
+                memset(name_buf, 0, sizeof name_buf); memset(pass_buf, 0, sizeof pass_buf); memset(role_buf, 0, sizeof role_buf);
                 new_sal = 5000.0; err[0] = '\0';
-                ImGui::CloseCurrentPopup(); }
+                bank_state::set_status("Employee Updated.");
+                ImGui::CloseCurrentPopup();
+            }
         }
         ImGui::SameLine();
     }
     if (btn_red("Cancel", { 100.f,0.f })) { new_sal = 5000.0; err[0] = '\0'; ImGui::CloseCurrentPopup(); }
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::EndPopup();
+}
+
+// ── Edit Client ────────────────────────────────────────────────────────────────
+static void modal_edit_client()
+{
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 display = io.DisplaySize;
+    ImVec2 popup_size = ImVec2(420, 350);
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - popup_size.x) * 0.5f,
+            (io.DisplaySize.y - popup_size.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+    if (bank_state::open_edit_client) { ImGui::SetNextWindowSize(popup_size); ImGui::OpenPopup("Edit Client"); bank_state::open_edit_client = false; }
+    if (!ImGui::BeginPopupModal("Edit Client", nullptr,
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) return;
+
+    static char name_buf[64] = {}; static char pass_buf[64] = {}; static char pass_Conf[64] = {};
+    static double new_bal = 1500.0; static char err[256] = {};
+    int idx = bank_state::selected_client;
+    if (idx >= 0 && idx < (int)bank_state::clients.size()) {
+        auto& client = bank_state::clients[idx];
+        ImGui::Indent();
+        ImGui::Text("Client: %s", client.getName().c_str());
+        ImGui::Text("Balance:  %s", fmt_money(client.getBalance()).c_str());
+        ImGui::Separator(); ImGui::Spacing();
+
+        ImGui::PushFont(customFontSize_01);
+        ImGui::TextColored(ImVec4(0.6941f, 0.749f, 0.9922f, 1.0f), "Edit client data: ");
+        ImGui::PopFont();
+        ImGui::Spacing();
+        ImGui::Text("New Full Name:"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f); ImGui::InputText("##edit_e_name", name_buf, sizeof name_buf);
+        ImGui::Text("New Password:"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f); ImGui::InputText("##edit_e_pass", pass_buf, sizeof pass_buf, ImGuiInputTextFlags_Password);
+
+        ImGui::Text("Confirm Password"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f);
+        ImGui::PushFont(customFontSize_01);
+        bool confirm_enter = ImGui::InputText("##su_confirm", pass_Conf, sizeof pass_Conf,
+            ImGuiInputTextFlags_Password | ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::PopFont();
+        
+        ImGui::Text("New Balance:"); ImGui::SameLine(160.f);
+        ImGui::SetNextItemWidth(170.f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.f);
+        ImGui::InputDouble("##ns", &new_bal, 500.0, 1000.0, "%.2f");
+        if (new_bal < 1.0) new_bal = 1.0;
+
+        if (err[0]) {
+            ImGui::Spacing();
+            ImGui::PushStyleColor(ImGuiCol_Text, { 1.f,0.4f,0.4f,1.f });
+            ImGui::TextWrapped("  %s", err);
+            ImGui::PopStyleColor();
+        }
+        else
+        {
+            ImGui::Spacing();
+            ImGui::TextWrapped("");
+        }
+
+        ImGui::Separator();
+
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x / 4));
+        if (btn_amber("Update", { 100.f,0.f })) {
+            std::string n(name_buf), p(pass_buf), c(pass_Conf);
+            if (!n.empty() && !utils::Validation::validateName(n))    strncpy_s(err, sizeof err, "Invalid name.", _TRUNCATE);
+            else if (!p.empty() && !utils::Validation::validatePassword(p)) strncpy_s(err, sizeof err, "Invalid password — 8-20 chars, no spaces.", _TRUNCATE);
+            else if (!utils::Validation::validateBalance(new_bal)) strncpy_s(err, sizeof err, "Balance below minimum ($1500).", _TRUNCATE);
+            else if (p != c)  strncpy_s(err, sizeof err, "Passwords do not match.", _TRUNCATE);
+            else
+            {
+
+                if (!n.empty())
+                    client.setName(n);
+
+                if (!p.empty())
+                    client.setPassword(p);
+
+                client.setBalance(new_bal);
+
+                vector<pair<Client, int>> tmpCli;
+                tmpCli.push_back({ client,0});
+                utils::FileHelper::updateClient(tmpCli);
+                memset(name_buf, 0, sizeof name_buf); memset(pass_buf, 0, sizeof pass_buf);
+                new_bal = 1500.0; err[0] = '\0';
+                bank_state::set_status("Client Updated.");
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::SameLine();
+    }
+    if (btn_red("Cancel", { 100.f,0.f })) { new_bal = 1500.0; err[0] = '\0'; ImGui::CloseCurrentPopup(); }
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::EndPopup();
+}
+
+// ── Edit Admin ────────────────────────────────────────────────────────────────
+static void modal_edit_admin()
+{
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 display = io.DisplaySize;
+    ImVec2 popup_size = ImVec2(420, 310);
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - popup_size.x) * 0.5f,
+            (io.DisplaySize.y - popup_size.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+    if (bank_state::open_edit_admin) { ImGui::SetNextWindowSize(popup_size); ImGui::OpenPopup("Edit Admin"); bank_state::open_edit_admin = false; }
+    if (!ImGui::BeginPopupModal("Edit Admin", nullptr,
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) return;
+
+    static char name_buf[64] = {}; static char pass_buf[64] = {}; static char pass_Conf[64] = {}; static char err[256] = {};
+    int idx = bank_state::selected_admin;
+    if (idx >= 0 && idx < (int)bank_state::admins.size()) {
+        auto& a = bank_state::admins[idx];
+        ImGui::Indent();
+        ImGui::Text("Admin: %s", a.getName().c_str());
+        ImGui::Text("Position: %s", a.getPosition().c_str());
+        ImGui::Separator(); ImGui::Spacing();
+
+        ImGui::PushFont(customFontSize_01);
+        ImGui::TextColored(ImVec4(0.6941f, 0.749f, 0.9922f, 1.0f), "Edit admin data: ");
+        ImGui::PopFont();
+        ImGui::Spacing();
+        ImGui::Text("New Full Name:"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f); ImGui::InputText("##edit_e_name", name_buf, sizeof name_buf);
+        ImGui::Text("New Password:"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f); ImGui::InputText("##edit_e_pass", pass_buf, sizeof pass_buf, ImGuiInputTextFlags_Password);
+
+        ImGui::Text("Confirm Password"); ImGui::SameLine(160.f); ImGui::SetNextItemWidth(210.f);
+        ImGui::PushFont(customFontSize_01);
+        bool confirm_enter = ImGui::InputText("##su_confirm", pass_Conf, sizeof pass_Conf,
+            ImGuiInputTextFlags_Password | ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::PopFont();
+        
+        if (err[0]) {
+            ImGui::Spacing();
+            ImGui::PushStyleColor(ImGuiCol_Text, { 1.f,0.4f,0.4f,1.f });
+            ImGui::TextWrapped("  %s", err);
+            ImGui::PopStyleColor();
+        }
+        else
+        {
+            ImGui::Spacing();
+            ImGui::TextWrapped("");
+        }
+
+        ImGui::Separator();
+
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x / 4));
+        if (btn_amber("Update", { 100.f,0.f })) {
+            std::string n(name_buf), p(pass_buf), c(pass_Conf);
+            if (!n.empty() && !utils::Validation::validateName(n))    strncpy_s(err, sizeof err, "Invalid name.", _TRUNCATE);
+            else if (!p.empty() && !utils::Validation::validatePassword(p)) strncpy_s(err, sizeof err, "Invalid password — 8-20 chars, no spaces.", _TRUNCATE);
+            else if (p != c)  strncpy_s(err, sizeof err, "Passwords do not match.", _TRUNCATE);
+            else if (isEmployeeUsernameExist(n)) {
+                strncpy_s(err, sizeof err, "Username exists, please try again.", _TRUNCATE);
+            }
+            else if (isAdminUsernameExist(n)) {
+                strncpy_s(err, sizeof err, "Username exists, please try again.", _TRUNCATE);
+            }
+            else
+            {
+
+                if (!n.empty())
+                    a.setName(n);
+
+                if (!p.empty())
+                    a.setPassword(p);
+
+                vector<pair<Admin, int>> tmpAdm;
+                tmpAdm.push_back({ a,0 });
+                utils::FileHelper::updateAdmin(tmpAdm);
+                if (a.getID() == bank_state::current_id)
+                    bank_state::current_username = a.getName();
+                memset(name_buf, 0, sizeof name_buf); memset(pass_buf, 0, sizeof pass_buf);
+                err[0] = '\0';
+                bank_state::set_status("Admin Updated.");
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::SameLine();
+    }
+    if (btn_red("Cancel", { 100.f,0.f })) { err[0] = '\0'; ImGui::CloseCurrentPopup(); }
+    ImGui::Spacing();
+    ImGui::Spacing();
     ImGui::EndPopup();
 }
 
@@ -1183,6 +1490,63 @@ static void modal_confirm_employee_deletion(int employeeIdx)
     ImGui::EndPopup();
 
 }
+
+static void modal_confirm_admin_deletion(int adminIdx)
+{
+
+    using namespace bank_state;
+    if (adminIdx < 0 || adminIdx >= (int)admins.size()) return;
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 display = io.DisplaySize;
+    ImVec2 popup_size = ImVec2(300, 170);
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - popup_size.x) * 0.5f,
+            (io.DisplaySize.y - popup_size.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+    if (open_remove_admin) { ImGui::SetNextWindowSize(popup_size); ImGui::OpenPopup("Delete Admin"); open_remove_admin = false; }
+    if (!ImGui::BeginPopupModal("Delete Admin", nullptr,
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) return;
+
+    ImGui::Indent();
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "Admin Info:");
+    ImGui::Indent();
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "ID: ");
+    ImGui::SameLine(0.f, 2.f);
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%d", admins[adminIdx].getID());
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "Name: ");
+    ImGui::SameLine(0.f, 2.f);
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", admins[adminIdx].getName());
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.f);
+    if (btn_red("Confirm", { 100.f,0.f })) {
+        vector<pair<Admin, int>> adminPlaceholder;
+        adminPlaceholder.push_back({ admins[adminIdx],0 });
+        utils::FileHelper::removeAdmin(adminPlaceholder);
+        admins.erase(admins.begin() + adminIdx);
+        if (selected_admin >= (int)admins.size()) selected_admin = (int)admins.size() - 1;
+        adminIdx = -1;
+        ImGui::CloseCurrentPopup();
+        set_status("Admin removed.");
+        //Employee::decreaseStaticID();
+    }
+    ImGui::SameLine();
+    if (btn_green("Cancel", { 100.f,0.f })) {
+        adminIdx = -1;
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::Unindent();
+    ImGui::Unindent();
+    ImGui::EndPopup();
+
+}
+
+
+
 // =============================================================================
 // Views
 // =============================================================================
@@ -1275,9 +1639,13 @@ static void view_clients(float w, float h)
     if (btn_green("Add Client", { 130.f,32.f })) open_add_client = true;
 
     ImGui::SameLine();
-    if (btn_red("Remove all Clients", { 160.f,32.f })) open_remove_all_clients = true;
+    if (selected_client >= 0)
+        if (btn_amber("Edit Client", { 135.f,32.f })) open_edit_client = true;
 
-    modal_add_client(); modal_deposit(); modal_withdraw(); modal_transfer(); modal_confirm_client_deletion(delete_idx); modal_remove_all_client();
+    ImGui::SameLine();
+    if (clients.size() >= 1 && btn_red("Remove all Clients", { 160.f,32.f })) open_remove_all_clients = true;
+
+    modal_add_client(); modal_edit_client(); modal_deposit(); modal_withdraw(); modal_transfer(); modal_confirm_client_deletion(delete_idx); modal_remove_all_client();
 }
 
 // ── Employee Management ───────────────────────────────────────────────────────
@@ -1327,7 +1695,7 @@ static void view_employees(float w, float h)
                 ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, { 0,24.f }))
                 selected_employee = i;
             ImGui::TableSetColumnIndex(1); ImGui::Text("%s", employees[i].getName().c_str());
-            ImGui::TableSetColumnIndex(2); ImGui::TextDisabled("%s", employees[i].getRole().c_str());
+            ImGui::TableSetColumnIndex(2); ImGui::TextDisabled("%s", employees[i].getPosition().c_str());
             ImGui::TableSetColumnIndex(3);
             ImGui::PushStyleColor(ImGuiCol_Text, { 0.30f,0.85f,0.50f,1.f });
             ImGui::Text("%s", fmt_money(employees[i].getSalary()).c_str());
@@ -1342,13 +1710,13 @@ static void view_employees(float w, float h)
     if (btn_green("Add Employee", { 145.f,32.f })) open_add_employee = true;
     if (selected_employee >= 0 && selected_employee < (int)employees.size()) {
         ImGui::SameLine();
-        if (btn_amber("Edit Salary", { 115.f,32.f })) open_set_salary = true;
+        if (btn_amber("Edit Employee", { 130.f,32.f })) open_edit_employee = true;
         ImGui::SameLine();
         if (btn_red("Remove", { 90.f,32.f }))  open_delete_employee = true;
     }
     ImGui::SameLine();
-    if (btn_red("Remove All Employees", { 170.f,32.f })) open_remove_all_employee = true;
-    modal_add_employee(); modal_set_salary(); modal_confirm_employee_deletion(selected_employee); modal_remove_all_employee();
+    if (employees.size() >= 1 && btn_red("Remove All Employees", { 170.f,32.f })) open_remove_all_employee = true;
+    modal_add_employee(); modal_edit_employee(); modal_confirm_employee_deletion(selected_employee); modal_remove_all_employee();
 }
 
 
@@ -1448,6 +1816,9 @@ static void view_admin(float w, float /*h*/)
         if (admins[selected_admin].getID() != current_id) if(btn_red("Remove Admin", { 110.f,32.f }))  open_remove_admin = true;
         
     }
+
+    ImGui::SameLine();
+    if (admins.size() >= 2 && btn_red("Remove All Admins", { 170.f,32.f })) open_remove_all_admin = true;
     ImGui::Spacing(); ImGui::Spacing();
 
     // Employee Roster Removed for reduduncy
@@ -1471,13 +1842,13 @@ static void view_admin(float w, float /*h*/)
     //        ImGui::TableNextRow();
     //        ImGui::TableSetColumnIndex(0); ImGui::Text("%d", e.getID());
     //        ImGui::TableSetColumnIndex(1); ImGui::Text("%s", e.getName().c_str());
-    //        ImGui::TableSetColumnIndex(2); ImGui::TextDisabled("%s", e.getRole().c_str());
+    //        ImGui::TableSetColumnIndex(2); ImGui::TextDisabled("%s", e.getPosition().c_str());
     //    }
     //    ImGui::EndTable();
     //}
     //ImGui::EndChild(); ImGui::PopStyleColor();
 
-    modal_add_admin();
+    modal_add_admin(); modal_edit_admin(); modal_confirm_admin_deletion(selected_admin); modal_remove_all_admin();
 }
 
 // =============================================================================
@@ -1544,7 +1915,9 @@ bool banking_gui::init(HWND hwnd, ID3D11Device* dev, ID3D11DeviceContext* ctx)
         "C:\\Windows\\Fonts\\segoeui.ttf",
         18.0f, &cfg, k_font_ranges);
 
-    customFontSize = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 24.0f);
+    customFontSize_01 = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 20.0f);
+    customFontSize_02 = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 24.0f);
+    customFontSize_03 = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 28.0f);
 
     if (!seg_font) {
         // Fallback: built-in pixel font (ASCII only, no UTF-8 extension)

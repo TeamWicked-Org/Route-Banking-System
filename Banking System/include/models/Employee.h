@@ -1,5 +1,8 @@
 #pragma once
 #include "Person.h"
+#include "Client.h"
+
+
 class Employee : public Person {
 
 private:
@@ -28,9 +31,11 @@ public:
 	string getPassword() const;
 	int getID() const;
 	double getSalary() const;
-	string getRole() const;
+	string getPosition() const;
 	static vector<Employee> getEmployeeList();
 	static int getGlobalID();
+
+	virtual void editClient(Client c);
 
 	// Misc
 	void display() const override;
