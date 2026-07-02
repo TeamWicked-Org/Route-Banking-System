@@ -399,16 +399,9 @@ static void draw_login_screen(const ImVec2& display)
     // ── Input fields ──────────────────────────────────────────
     // Admin Test
 
-    static char uname[64] = { 'W','a','n','d','a'};
-    static char upass[64] = { 'L','o','r','e','n','1','2','3'};
+    static char uname[64] = { 'A','d','m','i','n'};
+    static char upass[64] = { 'A','d','m','i','n','1','2','3'};
 
-    // Employee Test
-    //static char uname[64] = { 'E','m','m','a',' ','D','a','v','i','s'};
-    //static char upass[64] = { 'e','m','p','p','a','s','s','0','0','1'};
-
-    // Client Test
-    //static char uname[64] = { 'A','l','i','c','e',' ','S','m','i','t','h'};
-    //static char upass[64] = { 'p','a','s','s','w','o','r','d','0','0','1' };
 
     static char err[160] = {};
 
@@ -532,7 +525,7 @@ static void modal_add_client()
     ImGui::SameLine(); ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
     ImGui::InputDouble("##c_bal", &init_bal, 500.0, 1000.0, "%.2f");
 
-    if (init_bal < 1.0) init_bal = 1.0;
+    if (init_bal < utils::Validation::get_ValidationStruct().minBalance) init_bal = utils::Validation::get_ValidationStruct().minBalance;
 
     ImGui::Spacing();
     ImGui::PushStyleColor(ImGuiCol_Text, { 0.50f,0.56f,0.66f,1.f });
@@ -658,7 +651,7 @@ static void modal_deposit()
         ImGui::InputDouble("##dep", &amount, 100.0, 1000.0, "%.2f");
 
         ImGui::Unindent();
-        if (amount < 1.0) amount = 1.0;
+        if (amount < 0.0) amount = 0.0;
         ImGui::Spacing();
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
@@ -707,7 +700,7 @@ static void modal_withdraw()
         ImGui::SetNextItemWidth(150.f);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.f); ImGui::SameLine();
         ImGui::InputDouble("##wd", &amount, 100.0, 1000.0, "%.2f");
-        if (amount < 1.0) amount = 1.0;
+        if (amount < 0.0) amount = 0.0;
         if (err[0]) {
             ImGui::Spacing();
             ImGui::PushStyleColor(ImGuiCol_Text, { 1.f,0.4f,0.4f,1.f });
@@ -770,7 +763,7 @@ static void modal_transfer()
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 10.f); ImGui::SameLine();
         ImGui::InputDouble("##tr_amt", &amount, 100.0, 1000.0, "%.2f");
 
-        if (amount < 1.0) amount = 1.0;
+        if (amount < 0.0) amount = 0.0;
         ImGui::Text("To:");    ImGui::SameLine(90.f); ImGui::SetNextItemWidth(210.f);
         std::string prev_label = (target_idx >= 0 && target_idx < (int)bank_state::clients.size())
             ? bank_state::clients[target_idx].getName()
@@ -859,7 +852,7 @@ static void modal_add_employee()
     ImGui::SetNextItemWidth(210.f);
     ImGui::InputDouble("##e_sal", &salary, 500.0, 1000.0, "%.2f");
 
-    if (salary < 1.0) salary = 1.0;
+    if (salary < utils::Validation::get_ValidationStruct().minSalary) salary = utils::Validation::get_ValidationStruct().minSalary;
 
     if (err[0]) {
         ImGui::Spacing();
@@ -1057,7 +1050,7 @@ static void modal_edit_employee()
         ImGui::SetNextItemWidth(170.f);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.f);
         ImGui::InputDouble("##ns", &new_sal, 500.0, 1000.0, "%.2f");
-        if (new_sal < 1.0) new_sal = 1.0;
+        if (new_sal < utils::Validation::get_ValidationStruct().minSalary) new_sal = utils::Validation::get_ValidationStruct().minSalary;
 
         if (err[0]) {
             ImGui::Spacing();
@@ -1164,7 +1157,7 @@ static void modal_edit_client()
         ImGui::SetNextItemWidth(170.f);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3.f);
         ImGui::InputDouble("##ns", &new_bal, 500.0, 1000.0, "%.2f");
-        if (new_bal < 1.0) new_bal = 1.0;
+        if (new_bal < utils::Validation::get_ValidationStruct().minBalance) new_bal = utils::Validation::get_ValidationStruct().minBalance;
 
         if (err[0]) {
             ImGui::Spacing();
