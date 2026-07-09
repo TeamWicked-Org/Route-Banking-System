@@ -944,7 +944,6 @@ static void modal_remove_all_employee()
     ImGui::Unindent();
     ImGui::Unindent();
     ImGui::EndPopup();
-
 }
 
 // ── Remove All Admin ────────────────────────────────────────────────────────────────
@@ -1471,7 +1470,6 @@ static void modal_confirm_employee_deletion(int employeeIdx)
         employeeIdx = -1;
         ImGui::CloseCurrentPopup();
         set_status("Employee removed.");
-        //Employee::decreaseStaticID();
     }
     ImGui::SameLine();
     if (btn_green("Cancel", { 100.f,0.f })) {
@@ -1481,7 +1479,6 @@ static void modal_confirm_employee_deletion(int employeeIdx)
     ImGui::Unindent();
     ImGui::Unindent();
     ImGui::EndPopup();
-
 }
 
 static void modal_confirm_admin_deletion(int adminIdx)
@@ -1782,9 +1779,9 @@ static void view_admin(float w, float /*h*/)
             ImGui::TableNextRow(ImGuiTableRowFlags_None, 26.f);
             ImGui::TableSetColumnIndex(0);
             char lbl[24]; snprintf(lbl, sizeof lbl, "%d##as%d", admins[i].getID(), i);
-            if (ImGui::Selectable(lbl, selected_admin == i ,
+            if (ImGui::Selectable(lbl, selected_admin == i,
                 ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, { 0,24.f }))
-                    selected_admin = i;
+                selected_admin = i;
             ImGui::TableSetColumnIndex(1); ImGui::Text("%s", admins[i].getName().c_str());
             ImGui::PushStyleColor(ImGuiCol_Text, { 0.30f,0.85f,0.50f,1.f });
             ImGui::PopStyleColor();
@@ -1806,12 +1803,18 @@ static void view_admin(float w, float /*h*/)
         ImGui::SameLine();
         if (btn_amber("Edit Admin", { 115.f,32.f })) open_edit_admin = true;
         ImGui::SameLine();
-        if (admins[selected_admin].getID() != current_id) if(btn_red("Remove Admin", { 110.f,32.f }))  open_remove_admin = true;
-        
+        if (admins[selected_admin].getID() != current_id) if (btn_red("Remove Admin", { 110.f,32.f }))  open_remove_admin = true;
+
     }
 
     ImGui::SameLine();
-    if (admins.size() >= 2 && btn_red("Remove All Admins", { 170.f,32.f })) open_remove_all_admin = true;
+    if (admins.size() >= 2)
+    {
+        if (btn_red("Remove All Admins", { 170.f, 32.f }))
+            open_remove_all_admin = true;
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("This button removes all admins except the currently logged-in one.");
+    }
     ImGui::Spacing(); ImGui::Spacing();
 
     // Employee Roster Removed for reduduncy
@@ -1927,6 +1930,7 @@ bool banking_gui::init(HWND hwnd, ID3D11Device* dev, ID3D11DeviceContext* ctx)
     utils::FileHelper::fetchClients();
     utils::FileHelper::fetchEmployees();
     utils::FileHelper::fetchAdmins();
+    // copy backend vectors into GUI vectors (Memory vectors)
     bank_state::clients = Client::getClientList();
     bank_state::employees = Employee::getEmployeeList();
     bank_state::admins = Admin::getAdminList();

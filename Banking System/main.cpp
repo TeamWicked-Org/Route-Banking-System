@@ -52,7 +52,7 @@ static void render_frame()
     g_ctx->OMSetRenderTargets(1, &g_rtv, nullptr);
     g_ctx->ClearRenderTargetView(g_rtv, kClear);
     banking_gui::tick(g_bgTexture, g_winW, g_winH);
-    g_sc->Present(1, 0);
+    g_sc->Present(1, 0);        // vSync control
 }
 
 static bool make_rtv()
